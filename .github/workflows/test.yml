@@ -7,6 +7,7 @@ on:
       - "outreach.py"
       - "event_audit.py"
       - "event_discovery.py"
+      - "review_apply.py"
       - "data/event_sources.json"
       - ".github/workflows/research-outreach.yml"
       - "signal_engine.py"
