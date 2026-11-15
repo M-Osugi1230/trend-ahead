@@ -55,6 +55,17 @@ class OutreachTest(unittest.TestCase):
         self.assertIn("予測ではありません", text)
         self.assertIn("outbound_posts_sent", "outbound_posts_sent")
 
+    def test_date_only_calendar_entry_in_outreach_does_not_invent_midnight(self):
+        release = self.valid()
+        release["title"] = "新作映画公開"
+        release["starts_at"] = (NOW + timedelta(days=3)).date().isoformat()
+        result = self.get([release])
+        self.assertEqual(len(result), 1)
+        self.assertTrue(result[0]["date_only"])
+        draft = markdown_pack(result, NOW, "https://example.org/trend-ahead")
+        self.assertIn("（日付のみ） 新作映画公開", draft)
+        self.assertNotIn("00:00 新作映画公開", draft)
+
     def test_site_url_must_be_https(self):
         with self.assertRaises(ValueError):
             markdown_pack([], NOW, "http://localhost:3000")
