@@ -460,7 +460,29 @@ def upcoming_card(row, compact=False):
 <h3>{title}</h3><p>{summary}</p><div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer">公式情報を見る ↗</a><a href="{ics}" download>{extended_label}</a></div></div></article>'''
 
 
-def signal_section(signals):
+def recent_new_trends(rows, now, limit=3):
+    """Separate unconfirmed single sightings from repeat-observation signals."""
+    output = []
+    for row in rows:
+        if row.get('kind') != 'trends':
+            continue
+        try:
+            when = datetime.fromisoformat(row['first_seen_at'])
+            if not when.tzinfo or not timedelta(0) <= now - when <= timedelta(hours=8):
+                continue
+        except (ValueError, TypeError, KeyError):
+            continue
+        output.append({
+            'event_id': row['event_id'], 'title': row['title'],
+            'category': row.get('category', '全般'),
+            'label': '新着検索', 'first_observed_at': when.isoformat(),
+            'evidence': '初回検知 ' + fmt_date(when.isoformat()) + ' JST／継続上昇は未確認',
+        })
+    output.sort(key=lambda r: r['first_observed_at'], reverse=True)
+    return output[:limit]
+
+
+def signal_section(signals, new_arrivals=None):
     """Compact observed-signal column on the first screen."""
     if signals:
         articles = []
@@ -471,6 +493,15 @@ def signal_section(signals):
 <h3><a href="{url}">{esc(short_text(signal['title'], 67))} →</a></h3>
 <p>{esc(signal['evidence'])}</p></article>''')
         content = '<div class="front-signal-list">' + '\n'.join(articles) + '</div>'
+    elif new_arrivals:
+        articles = []
+        for entry in new_arrivals:
+            url = '/topics/' + esc(entry['event_id']) + '/'
+            articles.append(f'''<article class="front-signal-card">
+<div class="front-signal-meta"><span class="signal-status">{esc(entry['label'])}</span><span>初回観測</span></div>
+<h3><a href="{url}">{esc(short_text(entry['title'], 67))} →</a></h3>
+<p>{esc(entry['evidence'])}</p></article>''')
+        content = '<div class="front-signal-list">' + '\n'.join(articles) + '</div>'
     else:
         content = '<p class="signal-empty">観測データを収集中</p>'
     return f'''<aside id="signals" class="front-signals" aria-label="急上昇の兆候">
@@ -478,7 +509,7 @@ def signal_section(signals):
 {content}<details class="signal-method"><summary>判定方法</summary><p>RSSの推定検索量を繰り返し観測しています。スコアは予測確率ではありません。</p></details><a class="front-more" href="/#now">もっと見る →</a></aside>'''
 
 
-def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None):
+def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None, new_arrivals=None):
     cards = '\n'.join(card(row) for row in rows) if rows else '<div class="empty">現在、表示できる観測候補はありません。</div>'
     future = '\n'.join(upcoming_card(x, compact=True) for x in upcoming) if upcoming else '<div class="empty upcoming-empty">確認済みの予定イベントは準備中です。</div>'
     updated = esc(now.astimezone(JST).strftime('%m/%d %H:%M'))
@@ -515,7 +546,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <div class="front-bottom-links"><a href="/week/">今週の予定 →</a>
 <a href="/calendar/upcoming.ics" download>カレンダーに追加 →</a>
 <button type="button" class="front-share-button" data-share="{esc((site_url or '') + '/')}" data-title="Trend Ahead｜明日の話題を、今日知る。">共有 ↗</button></div>
-</div>{signal_section(signals or [])}</div>
+</div>{signal_section(signals or [], new_arrivals or [])}</div>
 <details class="front-data-status" data-status="{esc(state)}"><summary>{health_short}</summary>
 <p>{health_text} <a href="/methodology/">データと検知方法</a></p></details>
 </div></section>
@@ -602,6 +633,7 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     all_observed = sorted(unique.values(), key=lambda r: r['last_seen_at'], reverse=True)
     signal_candidates = [r for r in all_observed if r['kind'] == 'trends']
     signals = detect_signals(data_dir, signal_candidates, now)
+    new_arrivals = recent_new_trends(signal_candidates, now) if not signals else []
     rows = all_observed[:MAX_CARDS]
     upcoming = load_upcoming(data_dir / 'upcoming.json', now)
     health = collection_status(data_dir, now)
@@ -621,8 +653,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         if base_path:
             return content.replace('href="/', f'href="{base_path}/').replace('src="/', f'src="{base_path}/')
         return content
-    write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals)))
-    write(output / 'signals.json', json.dumps({'generated_at': now.isoformat(), 'signals': signals, 'note': 'Observation-only; not a forecast probability.'}, ensure_ascii=False, indent=2) + '\n')
+    write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals, new_arrivals)))
+    write(output / 'signals.json', json.dumps({'generated_at': now.isoformat(), 'signals': signals, 'new_arrivals': new_arrivals, 'note': 'First sightings are separate from repeat-observation signals. Not a forecast probability.'}, ensure_ascii=False, indent=2) + '\n')
     create_subscription_feeds(output, rows, upcoming, now, site_url)
     write(output / 'week' / 'index.html', page_html(week_page(upcoming, now, site_url, indexing_enabled)))
     for name in ('how', 'methodology', 'privacy'):
@@ -630,7 +662,7 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     write(output / 'calendar' / 'upcoming.ics', make_calendar_feed(upcoming, now))
     for row in upcoming:
         write(output / 'calendar' / (calendar_id(row) + '.ics'), make_ics(row, calendar_id(row), now))
-    priority_ids = {signal['event_id'] for signal in signals}
+    priority_ids = {item['event_id'] for item in (signals + new_arrivals)}
     priority_rows = [row for row in signal_candidates if row['event_id'] in priority_ids]
     detail_rows = (priority_rows + [row for row in rows if row['event_id'] not in priority_ids])[:MAX_DETAIL_PAGES]
     for row in detail_rows:
@@ -646,8 +678,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(
             f'<url><loc>{xml_escape(site_url + p)}</loc></url>\n' for p in paths) + '</urlset>\n'
         write(output / 'sitemap.xml', sitemap)
-    write(output / 'build-meta.json', json.dumps({'built_at': now.isoformat(), 'observed_cards': len(rows), 'signals_count': len(signals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'canonical_configured': bool(site_url), 'indexing_enabled': indexing_enabled, 'collection_status': health}, ensure_ascii=False, indent=2) + '\n')
-    return {'observed_cards': len(rows), 'signals_count': len(signals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'output': str(output), 'canonical_configured': bool(site_url), 'collection': health}
+    write(output / 'build-meta.json', json.dumps({'built_at': now.isoformat(), 'observed_cards': len(rows), 'signals_count': len(signals), 'new_arrivals_count': len(new_arrivals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'canonical_configured': bool(site_url), 'indexing_enabled': indexing_enabled, 'collection_status': health}, ensure_ascii=False, indent=2) + '\n')
+    return {'observed_cards': len(rows), 'signals_count': len(signals), 'new_arrivals_count': len(new_arrivals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'output': str(output), 'canonical_configured': bool(site_url), 'collection': health}
 
 
 def main():
