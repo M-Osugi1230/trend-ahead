@@ -3,8 +3,6 @@ __pycache__/
 .DS_Store
 .env
 *.tmp
-data/events/
-data/observations/
-data/runs/
-data/state.json
-
+dist/
+# Data under data/events, data/observations, data/runs, and state.json
+# is intentionally committed for the Phase 1 public GitHub Pages build.
