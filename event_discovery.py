@@ -218,6 +218,38 @@ def extract_heading_dates(html: str, source: dict, now: datetime):
     return found
 
 
+
+# Venue calendars that show "YYYY.MM.DD ... YYYY.MM.DD Event title 対象..."
+MAKUHARI_DATE_TITLE = re.compile(
+    r"(?P<start>20\d{2}[./]\d{1,2}[./]\d{1,2})\s*"
+    r"[（(][^)）]{1,4}[）)]\s*[〜~～\-ー]+\s*"
+    r"(?P<end>20\d{2}[./]\d{1,2}[./]\d{1,2})\s*"
+    r"[（(][^)）]{1,4}[）)]\s*(?P<title>.{6,150}?)\s*対象",
+    re.UNICODE | re.DOTALL,
+)
+
+
+def extract_date_title_rows(html: str, source: dict, now: datetime):
+    """Extract review-only candidates where the venue shows date before name."""
+    parser = HeadingTextExtractor()
+    parser.feed(html)
+    readable = re.sub(r"\s+", " ", " ".join(text for _, text in parser.blocks))
+    found = []
+    seen = set()
+    for match in MAKUHARI_DATE_TITLE.finditer(readable):
+        title = re.sub(r"\s+", " ", match.group("title")).strip()
+        if not title or len(title) > 150:
+            continue
+        candidate = candidate_from_heading(
+            title, match.group("start"), source, now
+        )
+        if candidate and candidate["candidate_id"] not in seen:
+            seen.add(candidate["candidate_id"])
+            found.append(candidate)
+        if len(found) >= source.get("max_candidates", 25):
+            break
+    return found
+
 def match_curated(candidate: dict, curated: list):
     # Only exact same normalized titles/dates can be confidently de-duplicated.
     match_title = normalize(candidate["title"])
@@ -244,14 +276,16 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") != "heading_dates"
+                or source.get("kind") not in ("heading_dates", "date_then_title")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
             continue
         try:
             html = fetcher(url)
-            rows = extract_heading_dates(html, source, now)
+            rows = (extract_heading_dates(html, source, now)
+                    if source["kind"] == "heading_dates"
+                    else extract_date_title_rows(html, source, now))
             added = 0
             for item in rows:
                 if item["candidate_id"] in seen:
