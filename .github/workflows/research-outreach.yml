@@ -6,6 +6,8 @@ on:
     paths:
       - 'backtest.py'
       - 'outreach.py'
+      - 'event_audit.py'
+      - 'data/upcoming.json'
       - '.github/workflows/research-outreach.yml'
   schedule:
     # Daily 07:15 JST. GitHub schedule execution can be delayed or skipped.
@@ -25,11 +27,16 @@ jobs:
           python-version: "3.12"
       - name: Research-only retrospective evaluation
         run: python backtest.py --output reports/backtest.json
+      - name: Review event catalog freshness and coverage
+        run: python event_audit.py --output reports/event-audit.json
       - name: Create review-only Japanese outreach drafts
         run: python outreach.py --site-url "https://m-osugi1230.github.io/trend-ahead" --output reports/outreach.md
       - name: Show sample sufficiency, not invented accuracy
         run: |
           python -c "import json; p=json.load(open('reports/backtest.json')); print({k:p[k] for k in ('status','labeled_cases','days_with_labels','missing_future_outcomes')})"
+      - name: Show 30-day event coverage
+        run: |
+          python -c "import json; a=json.load(open('reports/event-audit.json')); print({k:a[k] for k in ('status','total_curated','future_7_days','future_30_days','target_30_days','missing_categories_30d')})"
       - name: Archive output for human editorial review
         uses: actions/upload-artifact@v4
         with:
