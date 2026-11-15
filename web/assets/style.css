@@ -233,3 +233,14 @@ html{scroll-padding-top:78px}
  .now-section .topic-card{min-height:122px;padding:12px}
  .now-section .topic-card h3{font-size:14px;margin:7px 0}
 }
+
+
+/* Optional category calendar subscriptions (client handles refresh / reminders). */
+.calendar-feed-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:22px}
+.calendar-feed-card{background:#fff;border:1px solid #e1e8f2;border-radius:12px;padding:17px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.calendar-feed-card h2{font-size:15px;color:#223855;font-weight:750;line-height:1.5;margin:0}
+.calendar-feed-card h2 small{font-size:11px;color:#71829b;margin-left:7px;font-weight:550}
+.calendar-feed-actions{display:flex;gap:12px;flex-wrap:wrap}
+.calendar-feed-actions a{font-size:12px;color:#285fbe;font-weight:750}
+.calendar-feed-note{font-size:12px;color:#687b94;line-height:1.75;max-width:700px;margin-top:20px}
+@media(max-width:640px){.calendar-feed-list{grid-template-columns:1fr;gap:8px}.calendar-feed-card{padding:14px}}
