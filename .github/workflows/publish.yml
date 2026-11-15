@@ -1,6 +1,9 @@
 name: Publish Trend Ahead
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Collect trend candidates"]
+    types: [completed]
   push:
     branches: [main]
     paths:
@@ -17,6 +20,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -54,4 +58,14 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify deployed page is reachable
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          test -n "$PAGE_URL"
+          curl --fail --silent --show-error --location \
+               --retry 5 --retry-all-errors --retry-delay 3 \
+               --max-time 15 "$PAGE_URL" -o /tmp/trend-ahead-index.html
+          grep -q 'Trend Ahead' /tmp/trend-ahead-index.html
 
