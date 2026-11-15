@@ -21,6 +21,8 @@ SAFE_CATEGORY = {"スポーツ", "ゲーム", "映画・アニメ", "音楽・�
 def iso_datetime(value):
     try:
         result = datetime.fromisoformat(value)
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            return result.replace(tzinfo=JST)
         return result if result.tzinfo is not None else None
     except (ValueError, TypeError):
         return None
@@ -51,7 +53,9 @@ def get_candidates(path, now, days=14):
         verified = iso_datetime(row.get("verified_at"))
         if starts is None or verified is None:
             continue
-        if not (now <= starts <= now + timedelta(days=days)):
+        date_only = bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(row.get("starts_at", ""))))
+        expires = starts + (timedelta(days=1) if date_only else timedelta(minutes=1))
+        if expires <= now or starts > now + timedelta(days=days):
             continue
         if not (now - timedelta(days=30) <= verified <= now + timedelta(hours=1)):
             continue
@@ -63,9 +67,17 @@ def get_candidates(path, now, days=14):
         if not safe_https(row.get("official_url")):
             continue
         result.append({"title": title, "category": str(row["category"]),
-                       "starts_at": starts, "verified_at": verified,
-                       "official_url": row["official_url"]})
+                       "starts_at": starts, "date_only": date_only,
+                       "verified_at": verified, "official_url": row["official_url"]})
     return sorted(result, key=lambda x: x["starts_at"])
+
+
+def event_time_label(event, timezone_suffix=False):
+    value = event["starts_at"].astimezone(JST)
+    if event.get("date_only"):
+        return value.strftime("%m/%d") + "（日付のみ）"
+    return value.strftime("%m/%d %H:%M") + (" JST" if timezone_suffix else "")
+
 
 
 def markdown_pack(events, now, site_url):
@@ -95,7 +107,7 @@ def markdown_pack(events, now, site_url):
     ]
     if events:
         for event in events[:6]:
-            when = event["starts_at"].astimezone(JST).strftime("%m/%d %H:%M JST")
+            when = event_time_label(event, timezone_suffix=True)
             verify_at = event["verified_at"].astimezone(JST).strftime("%m/%d %H:%M JST")
             header.append(f"- [ ] {when}｜{event['title']}（{event['category']}）")
             header.append(f"  - 公式URL：{event['official_url']}")
@@ -106,8 +118,7 @@ def markdown_pack(events, now, site_url):
     if events:
         upcoming = events[:2]
         lines = ["「終わってから知った」を減らしたい。"]
-        lines += [f"・{event['starts_at'].astimezone(JST).strftime('%m/%d %H:%M')} {event['title']}"
-                  for event in upcoming]
+        lines += [f"・{event_time_label(event)} {event['title']}" for event in upcoming]
         lines.extend(["公式発表済みの予定を一覧化しました（話題化の予測ではありません）。", site_link])
         post = "\n".join(lines)
         if len(post) > 280:
