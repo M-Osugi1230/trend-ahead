@@ -416,14 +416,25 @@ def week_page(upcoming, now, site_url, indexing_enabled=False):
                        structured_data=structured if week else None)
 
 
-def upcoming_card(row):
+def upcoming_card(row, compact=False):
+    """Compact on the homepage; keep expanded description on the weekly page."""
     title = esc(short_text(row['title'], 85))
-    date = esc(row['start_dt'].astimezone(JST).strftime('%m月%d日 %H:%M'))
+    event_date = row['start_dt'].astimezone(JST)
+    day = event_date.strftime('%m/%d') + '(' + '月火水木金土日'[event_date.weekday()] + ')'
+    date = esc(day + event_date.strftime(' %H:%M'))
     category = esc(row.get('category', '予定イベント'))
     summary = esc(short_text(row.get('description', ''), 150))
     source = esc(row['official_url'])
     ics = '/calendar/' + calendar_id(row) + '.ics'
-    return f'''<article class="upcoming-card" data-category="{category}" data-starts-at="{esc(row['starts_at'])}" data-search="{esc((row['title'] + ' ' + row.get('description', '')).casefold())}"><div class="upcoming-date">{date}<small>日本時間</small></div><div class="upcoming-info">
+    attributes = (f'data-category="{category}" data-starts-at="{esc(row["starts_at"])}" '
+                  f'data-search="{esc((row["title"] + " " + row.get("description", "")).casefold())}"')
+    if compact:
+        return f'''<article class="upcoming-card upcoming-card-compact" {attributes}>
+<div class="event-topline"><time datetime="{esc(row['starts_at'])}">{date}</time><span class="event-category">{category}</span></div>
+<h3>{title}</h3>
+<div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer" aria-label="{title}の公式情報を見る">公式情報 ↗</a>
+<a href="{ics}" download aria-label="{title}を30分前通知付きでカレンダーに登録">予定に追加 ＋</a></div></article>'''
+    return f'''<article class="upcoming-card" {attributes}><div class="upcoming-date">{date}<small>日本時間</small></div><div class="upcoming-info">
 <span class="pill verified">公式情報で確認済み</span> <span class="light-text">{category}</span>
 <h3>{title}</h3><p>{summary}</p><div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer">公式情報を見る ↗</a><a href="{ics}" download>30分前通知をカレンダーに追加 ↗</a></div></div></article>'''
 
@@ -440,11 +451,10 @@ def signal_section(signals):
 <p>{esc(signal['evidence'])}</p></article>''')
         content = '<div class="front-signal-list">' + '\n'.join(articles) + '</div>'
     else:
-        content = '<p class="signal-empty">いまは十分な反復観測がありません。根拠のある兆候が見つかり次第、表示します。</p>'
+        content = '<p class="signal-empty">観測データを収集中</p>'
     return f'''<aside id="signals" class="front-signals" aria-label="急上昇の兆候">
-<div class="front-aside-head"><span class="kicker">SIGNAL WATCH</span><h2>動き始めた話題</h2>
-<p>検索の推定値を複数回観測した候補です。スコアは予測確率ではありません。</p></div>
-{content}<a class="front-more" href="/#now">いまの話題をもっと見る →</a></aside>'''
+<div class="front-aside-head"><h2>動き始めた話題 <span class="kicker">SIGNAL</span></h2></div>
+{content}<details class="signal-method"><summary>判定方法</summary><p>RSSの推定検索量を繰り返し観測しています。スコアは予測確率ではありません。</p></details><a class="front-more" href="/#now">もっと見る →</a></aside>'''
 
 
 def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None):
