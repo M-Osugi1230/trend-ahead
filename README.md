@@ -89,4 +89,4 @@ GitHub Actionsのスケジュール実行時刻は保証されず、遅延・欠
 - [`METRICS.md`](METRICS.md)：イベント定義、データ品質、評価の手順
 - [`tests`](tests)：ユニットテスト（追加パッケージ不要）
 
-**公開状態：** 本パッケージは公開用の実装候補です。GitHubリポジトリへの配置、実データでの継続取得、一般公開URLの稼働確認は未実施です。
+**公開状態（2026-11-15）：** `M-Osugi1230/trend-ahead` の `main` へのソースコード反映は完了。GitHub Actions のユニットテストは成功しています。GitHub Pages は未設定のため公開ワークフローは `Configure GitHub Pages` で失敗しています。Settings → Pages → Build and deployment → Source で **GitHub Actions** を選択してください。実データの継続取得と一般公開URLの稼働確認は未実施です。
