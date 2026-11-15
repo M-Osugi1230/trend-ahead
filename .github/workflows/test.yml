@@ -5,6 +5,7 @@ on:
       - "collector.py"
       - "backtest.py"
       - "outreach.py"
+      - "event_audit.py"
       - ".github/workflows/research-outreach.yml"
       - "signal_engine.py"
       - "build_site.py"
