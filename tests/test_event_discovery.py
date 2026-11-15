@@ -6,7 +6,7 @@ from pathlib import Path
 
 from event_discovery import (
     allowed_https_url, candidate_from_heading, discover, extract_heading_dates,
-    match_curated, normalize, review_markdown,
+    match_curated, normalize, review_markdown, extract_date_title_rows,
 )
 
 NOW = datetime(2026, 11, 16, 8, tzinfo=timezone(timedelta(hours=9)))
@@ -96,6 +96,24 @@ class DiscoveryTests(unittest.TestCase):
         self.assertIn("編集審査キュー", markdown)
         self.assertIn("未確認・未公開", markdown)
         self.assertIn("temporary network failure", markdown)
+
+    def test_date_before_title_venue_listing(self):
+        source = {
+            "id": "makuhari_messe", "url": "https://www.m-messe.co.jp/event/",
+            "category": "季節・イベント", "kind": "date_then_title",
+            "max_candidates": 25,
+        }
+        page = """<ul><li>音楽イベント
+        2026.11.22(日) 〜 2026.11.23(月)
+        CHILL CLASSIC CONCERT -Winter Illumination- 対象一般</li>
+        <li>展示会・見本市 2026.11.18(水) 〜 2026.11.20(金)
+        Inter BEE 2026 対象関係者、一般</li></ul>"""
+        rows = extract_date_title_rows(page, source, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["title"], "CHILL CLASSIC CONCERT -Winter Illumination-")
+        self.assertEqual(rows[0]["starts_at"], "2026-11-22")
+        self.assertEqual(rows[1]["title"], "Inter BEE 2026")
+        self.assertFalse(any("verified_at" in row for row in rows))
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
