@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - "collector.py"
+      - "backtest.py"
+      - "outreach.py"
+      - ".github/workflows/research-outreach.yml"
       - "signal_engine.py"
       - "build_site.py"
       - "web/**"
