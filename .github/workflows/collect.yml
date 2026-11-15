@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Rerun of an older workflow must use current state.json and history.
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
