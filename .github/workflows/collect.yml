@@ -6,6 +6,7 @@ on:
     paths:
       - 'collector.py'
       - 'sources.json'
+      - '.gitignore'
       - '.github/workflows/collect.yml'
   schedule:
     - cron: "17,47 * * * *"
