@@ -296,7 +296,7 @@ def format_page(title, description, body, *, canonical='', noindex=False, styles
 def header():
     return '''<header class="topbar"><div class="wrap navwrap">
 <a class="brand" href="/" aria-label="Trend Ahead ホーム"><span class="brandmark">↗</span> Trend<span class="brand-light">Ahead</span></a>
-<nav aria-label="メインナビゲーション"><a href="/#now">いまの注目</a><a href="/week/">今週の予定</a><a href="/#saved">保存</a><a href="/how/">使い方</a></nav>
+<nav aria-label="メインナビゲーション"><a href="/#upcoming">これから</a><a href="/#signals">兆候</a><a href="/#now">いまの話題</a><a href="/week/">今週</a></nav>
 </div></header>'''
 
 
@@ -423,30 +423,28 @@ def upcoming_card(row):
     summary = esc(short_text(row.get('description', ''), 150))
     source = esc(row['official_url'])
     ics = '/calendar/' + calendar_id(row) + '.ics'
-    return f'''<article class="upcoming-card" data-category="{category}"><div class="upcoming-date">{date}<small>日本時間</small></div><div class="upcoming-info">
+    return f'''<article class="upcoming-card" data-category="{category}" data-starts-at="{esc(row['starts_at'])}" data-search="{esc((row['title'] + ' ' + row.get('description', '')).casefold())}"><div class="upcoming-date">{date}<small>日本時間</small></div><div class="upcoming-info">
 <span class="pill verified">公式情報で確認済み</span> <span class="light-text">{category}</span>
 <h3>{title}</h3><p>{summary}</p><div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer">公式情報を見る ↗</a><a href="{ics}" download>30分前通知をカレンダーに追加 ↗</a></div></div></article>'''
 
 
 def signal_section(signals):
-    """Display explainable RSS observations, never false predictive odds."""
+    """Compact observed-signal column on the first screen."""
     if signals:
         articles = []
         for signal in signals:
             url = '/topics/' + esc(signal['event_id']) + '/'
-            articles.append(f'''<article><span class="feature-num">{esc(signal['label'])}</span>
-<h3><a href="{url}">{esc(short_text(signal['title'], 75))} →</a></h3>
-<p>{esc(signal['evidence'])}</p>
-<p>観測指標 {signal['score']}/100（予測確率ではありません）</p>
-</article>''')
-        content = '<div class="feature-grid">' + '\n'.join(articles) + '</div>'
+            articles.append(f'''<article class="front-signal-card">
+<div class="front-signal-meta"><span class="signal-status">{esc(signal['label'])}</span><span>{signal['samples']}回の観測</span></div>
+<h3><a href="{url}">{esc(short_text(signal['title'], 67))} →</a></h3>
+<p>{esc(signal['evidence'])}</p></article>''')
+        content = '<div class="front-signal-list">' + '\n'.join(articles) + '</div>'
     else:
-        content = '<div class="empty">十分な複数回観測がまだありません。推定検索量の変化が確認できたら表示します。</div>'
-    return f'''<section id="signals" class="section wrap"><div class="section-header"><div>
-<span class="kicker">SIGNAL WATCH</span><h2>盛り上がりの兆候を追う</h2>
-<p>Google Trends RSSの同一トピックを複数回観測し、検索量の推定値の変化を確認しています。\
-観測指標は内部の並べ替え用で、将来の人気や流行の確率を予測するものではありません。</p>
-</div></div>{content}</section>'''
+        content = '<p class="signal-empty">いまは十分な反復観測がありません。根拠のある兆候が見つかり次第、表示します。</p>'
+    return f'''<aside id="signals" class="front-signals" aria-label="急上昇の兆候">
+<div class="front-aside-head"><span class="kicker">SIGNAL WATCH</span><h2>動き始めた話題</h2>
+<p>検索の推定値を複数回観測した候補です。将来の流行を保証する予測ではありません。</p></div>
+{content}<a class="front-more" href="/#now">いまの話題をもっと見る →</a></aside>'''
 
 
 def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None):
@@ -459,18 +457,31 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
                    f'<a href="/feeds/upcoming.xml">今後の予定を購読 ↗</a></div>') if site_url else '' 
     page = f'''{header()}
 <main>
-<section class="hero"><div class="wrap hero-grid"><div><p class="eyebrow">DISCOVER WHAT'S NEXT <span class="live-dot"></span></p>
-<h1>明日の話題を、<br><em>今日知る。</em></h1>
-<p class="lead">寝る前に「今日、そんな面白いことがあったの？」と思う前に。<br>世の中の注目トピックをひとつの場所で見つけて、次の盛り上がりに参加しよう。</p>
-<div class="hero-actions"><a class="primary-btn" href="#now">いまの注目を見る <span>↗</span></a><a class="ghost-btn" href="/week/">今週の予定 →</a><button type="button" class="ghost-btn" data-share="{esc((site_url or '') + '/')}" data-title="Trend Ahead｜明日の話題を、今日知る。">このサービスを共有 ↗</button></div>
-<p class="hero-note">登録不要・無料で閲覧できます。表示は事実確認済みの予測ではなく、検知した候補と確認済みの予定を区別しています。</p>
-</div><div class="hero-panel" aria-label="サービスの仕組み"><div class="panel-top"><span class="panel-kicker">THE SIGNAL</span><span class="small-indicator">● EARLY SIGNALS</span></div>
-<div class="panel-copy">いま話題になり始めたこと。<br><strong>これから話題になるかもしれないこと。</strong></div>
-<div class="signal"><span class="signal-icon">01</span><span>見つける</span><span class="signal-bar sb1"></span></div>
-<div class="signal"><span class="signal-icon">02</span><span>見極める</span><span class="signal-bar sb2"></span></div>
-<div class="signal"><span class="signal-icon">03</span><span>楽しむ</span><span class="signal-bar sb3"></span></div>
-<div class="panel-foot">KNOW IT BEFORE YOU MISS IT.</div></div></div></section>
-{signal_section(signals or [])}
+<section class="discovery-heading"><div class="wrap">
+<div class="discovery-kicker"><span class="kicker">WHAT'S NEXT / これからの注目</span><span class="discovery-free">登録不要・無料</span></div>
+<div class="discovery-title"><div><h1>これから何がある？<br><em>先に知って、楽しもう。</em></h1>
+<p>配信・ゲーム・スポーツ・イベント。これから参加できる予定と、動き始めた話題をすぐにチェック。</p></div>
+<a class="discovery-how" href="/how/">Trend Aheadの使い方 →</a></div>
+</div></section>
+<section id="upcoming" class="front-discovery"><div class="wrap">
+<div class="front-discovery-head"><div><h2>これからの注目予定</h2><p>日時と出典を公式情報で確認した予定を掲載。話題化の確率予測ではありません。</p></div><a class="front-calendar-link" href="/calendar/upcoming.ics" download>予定を一括でカレンダー登録 ↗</a></div>
+<div class="front-filters" aria-label="これからの予定を絞り込む">
+<div class="future-range" role="group" aria-label="開催日までの期間">
+<button class="future-range-button is-active" type="button" data-future-window="all" aria-pressed="true">すべて</button>
+<button class="future-range-button" type="button" data-future-window="7" aria-pressed="false">7日以内</button>
+<button class="future-range-button" type="button" data-future-window="30" aria-pressed="false">30日以内</button>
+</div>
+<label class="future-query"><span aria-hidden="true">⌕</span><input id="future-search" type="search" placeholder="予定をキーワード検索" aria-label="予定をキーワードで検索"></label>
+<select id="future-category" aria-label="予定のジャンルで絞り込む"><option value="all">すべてのジャンル</option>{''.join(f'<option value="{esc(c)}">{esc(c)}</option>' for c in CATEGORIES if c != '全般')}</select>
+</div>
+<div class="front-layout"><div class="front-main">
+<p id="future-result-status" class="future-result-status" role="status" aria-live="polite">{len(upcoming)}件の予定を表示</p>
+<div id="future-list" class="front-event-list">{future}</div>
+<p id="future-empty" class="empty" hidden>条件に合う予定はありません。期間やジャンルを変えてお探しください。</p>
+<div class="front-bottom-links"><a href="/week/">今週の予定を詳しく見る →</a><a href="/calendar/upcoming.ics" download>カレンダーに一括登録 →</a></div>
+</div>{signal_section(signals or [])}</div>
+<p class="front-data-status">{health_text} <a href="/methodology/">データの更新・検知方法</a></p>
+</div></section>
 <section id="now" class="section wrap"><div class="section-header"><div><span class="kicker">01 / NOW</span><h2>いま、注目されている話題</h2><p>検索急上昇とニュース掲載を観測した候補です。盛り上がりの予測が確定したものではありません。</p></div><div class="updated">画面生成：{updated} JST</div></div>
 {rss_buttons}
 <div class="collection-health" role="status" data-status="{esc(health['status'])}">{health_text}　<span>画面生成：{updated} JST</span></div>
@@ -480,7 +491,6 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <button type="button" id="saved-toggle" class="filter-btn" aria-pressed="false">☆ 保存した話題</button></div>
 <p id="result-count" class="result-count" aria-live="polite"></p><div class="cards" id="topic-list">{cards}</div><p id="filter-empty" class="empty" hidden>条件に合う話題がありません。</p>
 </section>
-<section id="upcoming" class="section future-section"><div class="wrap"><div class="section-header"><div><span class="kicker">02 / NEXT</span><h2>これからの注目予定</h2><p>公式情報で開催日時を確認できた予定だけを掲載します。未確認の予測を事実のようには扱いません。</p></div></div><div class="upcoming-list">{future}</div><div class="future-links"><a class="ghost-btn" href="/week/">今週の予定を一覧で見る →</a><a class="ghost-btn" href="/calendar/upcoming.ics" download>予定をまとめてカレンダーに追加 →</a></div></div></section>
 <section class="section wrap feature-section"><div><span class="kicker">03 / WHY TREND AHEAD</span><h2>「見逃した」を減らす3つの視点</h2></div>
 <div class="feature-grid"><article><span class="feature-num">01</span><h3>いま見つける</h3><p>ジャンルを限定せず、複数の情報源から話題の兆候を拾います。</p></article>
 <article><span class="feature-num">02</span><h3>先を知る</h3><p>公式発表された予定をまとめ、これから参加できる機会を探します。</p></article>
