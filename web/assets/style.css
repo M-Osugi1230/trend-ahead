@@ -126,3 +126,7 @@ html{scroll-padding-top:78px}
   .front-signals{padding:14px}
   .front-discovery + .section{padding-top:32px}
 }
+
+/* Keep word-of-mouth sharing available without displacing the future-event grid. */
+.front-share-button{background:none;border:0;padding:0;color:#285bc2;font-weight:750;font-size:12px}
+.front-share-button:hover{text-decoration:underline}
