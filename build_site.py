@@ -478,7 +478,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <p id="future-result-status" class="future-result-status" role="status" aria-live="polite">{len(upcoming)}件の予定を表示</p>
 <div id="future-list" class="front-event-list">{future}</div>
 <p id="future-empty" class="empty" hidden>条件に合う予定はありません。期間やジャンルを変えてお探しください。</p>
-<div class="front-bottom-links"><a href="/week/">今週の予定を詳しく見る →</a><a href="/calendar/upcoming.ics" download>カレンダーに一括登録 →</a></div>
+<div class="front-bottom-links"><a href="/week/">今週の予定を詳しく見る →</a><a href="/calendar/upcoming.ics" download>カレンダーに一括登録 →</a><button type="button" class="front-share-button" data-share="{esc((site_url or '') + '/')}" data-title="Trend Ahead｜明日の話題を、今日知る。">友達に共有 ↗</button></div>
 </div>{signal_section(signals or [])}</div>
 <p class="front-data-status">{health_text} <a href="/methodology/">データの更新・検知方法</a></p>
 </div></section>
