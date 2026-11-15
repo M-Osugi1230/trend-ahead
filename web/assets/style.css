@@ -29,3 +29,100 @@
 .rss-links a{font-size:12px;color:#245ee8}
 @media(max-width:640px){.interest-panel{padding:15px}.interest-options{gap:6px}.interest-choice{font-size:11px;padding:7px}.collection-health{padding:12px}.future-links a{width:100%;text-align:center}}
 
+
+/* v0.6: information-first discovery. Future items take precedence over marketing copy. */
+html{scroll-padding-top:78px}
+.topbar{height:64px}
+.discovery-heading{background:#fdfefe;border-bottom:1px solid #e8ecf3;padding:24px 0 18px}
+.discovery-kicker{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.discovery-free{font-size:11px;color:#52749d;background:#eaf1fc;border-radius:99px;padding:5px 11px;font-weight:700}
+.discovery-title{display:flex;align-items:end;justify-content:space-between;gap:24px}
+.discovery-title h1{font-size:clamp(27px,3.3vw,39px);line-height:1.38;letter-spacing:-1.2px;color:#172945;margin:0 0 8px}
+.discovery-title h1 em{font-style:normal;color:#275de6}
+.discovery-title p{font-size:13px;line-height:1.65;color:#687b94;margin:0}
+.discovery-how{font-size:12px;color:#2e61bc;font-weight:700;white-space:nowrap;margin-bottom:7px}
+.front-discovery{padding:24px 0 24px;background:#f5f8fd}
+.front-discovery-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:16px}
+.front-discovery-head h2{font-size:21px;letter-spacing:-.5px;color:#192b47;margin:0 0 5px}
+.front-discovery-head p{font-size:11px;line-height:1.55;color:#64758f;margin:0}
+.front-calendar-link{font-size:12px;color:#245edc;font-weight:700;white-space:nowrap}
+.front-filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.future-range{display:flex;border:1px solid #dae3f1;background:#fff;border-radius:10px;padding:3px;gap:3px}
+.future-range-button{font-size:12px;font-weight:730;border:0;border-radius:7px;background:transparent;color:#667790;padding:9px 13px;white-space:nowrap;min-height:36px}
+.future-range-button.is-active{background:#245ee9;color:#fff;box-shadow:0 2px 6px #2a5be52a}
+.future-query{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #dae3f1;border-radius:9px;padding:0 12px;min-height:42px;color:#73849b;flex:1;min-width:180px}
+.future-query input{background:transparent;border:0;outline:none;font-size:12px;min-width:0;width:100%;color:#22344f}
+.front-filters select{height:42px;border:1px solid #dae3f1;border-radius:9px;background:#fff;font-size:12px;color:#546781;padding:0 10px;max-width:180px;flex-shrink:0}
+.front-layout{display:grid;grid-template-columns:minmax(0,1.82fr) minmax(260px,1fr);gap:16px;align-items:start}
+.front-main{min-width:0}
+.future-result-status{font-size:11px;color:#718198;margin:0 0 9px}
+.front-event-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.front-event-list .upcoming-card{display:flex;flex-direction:column;gap:8px;padding:16px;min-width:0;min-height:172px;background:#fff;border:1px solid #e0e7f1;border-radius:12px;box-shadow:0 2px 11px #23396409}
+.front-event-list .upcoming-card[hidden]{display:none!important}
+.front-event-list .upcoming-date{font-size:15px;color:#265cba;line-height:1.2;letter-spacing:-.3px}
+.front-event-list .upcoming-date small{font-size:10px;display:inline;margin-left:6px;color:#8a98ae}
+.front-event-list .upcoming-info{display:flex;flex-direction:column;flex:1;min-width:0}
+.front-event-list .upcoming-info h3{font-size:14px;line-height:1.45;margin:7px 0 5px;overflow-wrap:anywhere;color:#1c304e}
+.front-event-list .upcoming-info p{font-size:11px;line-height:1.5;margin:0 0 7px;color:#687892;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.front-event-list .upcoming-actions{margin-top:auto;gap:9px}
+.front-event-list .upcoming-actions a{font-size:11px}
+.front-event-list .upcoming-actions a:last-child{padding:5px 7px}
+.front-event-list .pill{padding:3px 6px;font-size:9px}
+.front-event-list .light-text{font-size:10px}
+.front-bottom-links{display:flex;flex-wrap:wrap;gap:15px;margin-top:13px}
+.front-bottom-links a{font-size:12px;font-weight:750;color:#285bc2}
+.front-signals{background:#fff;border:1px solid #dfe6f0;border-radius:13px;padding:18px;min-width:0;scroll-margin-top:78px}
+.front-aside-head h2{font-size:18px;margin:7px 0 5px;color:#18304b;letter-spacing:-.4px}
+.front-aside-head p{font-size:11px;color:#75849c;line-height:1.6;margin:0 0 8px}
+.front-signal-list{display:grid;gap:0}
+.front-signal-card{padding:12px 0;border-bottom:1px solid #eef1f7}
+.front-signal-card h3{font-size:13px;line-height:1.5;color:#223552;margin:7px 0}
+.front-signal-card p{font-size:11px;color:#7a879a;line-height:1.6;margin:0}
+.front-signal-meta{display:flex;justify-content:space-between;gap:6px;color:#8d9bb0;font-size:10px}
+.signal-status{font-size:10px;color:#216e9e;background:#e9f5fb;border-radius:5px;padding:3px 6px;font-weight:750}
+.signal-empty{font-size:12px;color:#64768c;line-height:1.75;margin:15px 0}
+.front-more{font-size:12px;color:#2562d6;font-weight:750;display:inline-block;margin-top:13px}
+.front-data-status{font-size:11px;line-height:1.7;color:#75849d;margin:14px 0 0}
+.front-data-status a{color:#366ac7;text-decoration:underline;text-underline-offset:2px}
+.front-discovery .empty{padding:22px;font-size:12px}
+.front-discovery + .section{padding-top:46px}
+@media(max-width:1000px){
+  .front-layout{grid-template-columns:minmax(0,1fr) 270px}
+  .front-event-list{grid-template-columns:1fr}
+  .front-event-list .upcoming-card{min-height:135px}
+}
+@media(max-width:750px){
+  .front-layout{grid-template-columns:1fr}
+  .front-event-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .front-signals{margin-top:10px}
+  .front-calendar-link,.discovery-how{display:none}
+}
+@media(max-width:640px){
+  html{scroll-padding-top:65px}
+  .topbar{height:58px}
+  .topbar nav{gap:10px;font-size:11px}
+  .topbar nav a:nth-child(3),.topbar nav a:nth-child(4){display:none}
+  .discovery-heading{padding:15px 0 12px}
+  .discovery-kicker{margin-bottom:7px}
+  .discovery-title h1{font-size:24px;letter-spacing:-.7px;line-height:1.27;margin-bottom:6px}
+  .discovery-title h1 br{display:none}
+  .discovery-title p{font-size:11px;line-height:1.5}
+  .front-discovery{padding:14px 0 26px}
+  .front-discovery-head{margin-bottom:11px}
+  .front-discovery-head h2{font-size:18px}
+  .front-discovery-head p{font-size:10px;line-height:1.5}
+  .front-filters{gap:7px;margin-bottom:9px}
+  .future-range{width:100%}
+  .future-range-button{flex:1;min-height:31px;padding:6px 8px;font-size:11px}
+  .future-query{flex:1;min-width:0;min-height:39px}
+  .front-filters select{min-height:39px;height:39px;max-width:142px;font-size:11px;flex:0 0 142px}
+  .front-event-list{grid-template-columns:1fr;gap:8px}
+  .front-event-list .upcoming-card{padding:12px 13px;min-height:0;gap:4px}
+  .front-event-list .upcoming-date{font-size:13px}
+  .front-event-list .upcoming-info h3{font-size:14px;margin:4px 0}
+  .front-event-list .upcoming-info p{font-size:10px;line-height:1.45;margin:0 0 7px}
+  .front-event-list .upcoming-actions{gap:10px}
+  .front-event-list .upcoming-actions a{font-size:10px}
+  .front-signals{padding:14px}
+  .front-discovery + .section{padding-top:32px}
+}
