@@ -87,17 +87,22 @@ def load_upcoming(path, now):
         if not url or not row.get('verified_at') or not row.get('title'):
             continue
         try:
-            start = datetime.fromisoformat(row.get('starts_at'))
+            raw_start = row.get('starts_at')
+            date_only = isinstance(raw_start, str) and bool(re.fullmatch(r'\d{4}-\d{2}-\d{2}', raw_start))
+            start = datetime.fromisoformat(raw_start)
+            if date_only:
+                start = start.replace(tzinfo=JST)
             verified = datetime.fromisoformat(row.get('verified_at'))
             if not start.tzinfo or not verified.tzinfo:
                 continue
-            if start < now - timedelta(hours=2) or start > now + timedelta(days=90):
+            expires = start + (timedelta(days=1) if date_only else timedelta(hours=2))
+            if expires <= now or start > now + timedelta(days=90):
                 continue
             if verified > now or verified < now - timedelta(days=30):
                 continue
         except (ValueError, TypeError):
             continue
-        results.append({**row, 'official_url': url, 'start_dt': start})
+        results.append({**row, 'official_url': url, 'start_dt': start, 'date_only': date_only})
     return sorted(results, key=lambda r: r['start_dt'])[:30]
 
 
@@ -331,18 +336,26 @@ def ics_escape(value):
 
 
 def make_ics(row, uid, now):
-    start = row['start_dt'].astimezone(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     stamp = now.astimezone(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    if row.get('date_only'):
+        start_date = row['start_dt'].astimezone(JST).strftime('%Y%m%d')
+        next_date = (row['start_dt'] + timedelta(days=1)).astimezone(JST).strftime('%Y%m%d')
+        starts = [f'DTSTART;VALUE=DATE:{start_date}', f'DTEND;VALUE=DATE:{next_date}']
+        alarm = []
+    else:
+        start = row['start_dt'].astimezone(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+        starts = [f'DTSTART:{start}']
+        alarm = ['BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:-PT30M',
+                 'DESCRIPTION:開催30分前です。公式ページで最新情報を確認してください。',
+                 'END:VALARM']
     lines = [
         'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Trend Ahead//Upcoming Reminder//JA',
         'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-        f'UID:{uid}@trend-ahead', f'DTSTAMP:{stamp}', f'DTSTART:{start}',
+        f'UID:{uid}@trend-ahead', f'DTSTAMP:{stamp}', *starts,
         f'SUMMARY:{ics_escape(row["title"])}',
         f'DESCRIPTION:{ics_escape(row.get("description", ""))}',
         f'URL:{row["official_url"]}', 'TRANSP:TRANSPARENT',
-        'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:-PT30M',
-        'DESCRIPTION:開催30分前です。公式ページで最新情報を確認してください。',
-        'END:VALARM', 'END:VEVENT', 'END:VCALENDAR',
+        *alarm, 'END:VEVENT', 'END:VCALENDAR',
     ]
     result = []
     for line in lines:
@@ -369,9 +382,15 @@ def make_calendar_feed(upcoming, now):
              'X-WR-CALNAME:Trend Ahead 公式確認済みイベント']
     for event in upcoming:
         uid = calendar_id(event)
-        start = event['start_dt'].astimezone(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+        if event.get('date_only'):
+            day = event['start_dt'].astimezone(JST).strftime('%Y%m%d')
+            next_day = (event['start_dt'] + timedelta(days=1)).astimezone(JST).strftime('%Y%m%d')
+            starts = [f'DTSTART;VALUE=DATE:{day}', f'DTEND;VALUE=DATE:{next_day}']
+        else:
+            start = event['start_dt'].astimezone(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+            starts = [f'DTSTART:{start}']
         lines.extend(['BEGIN:VEVENT', f'UID:{uid}@trend-ahead',
-                      f'DTSTAMP:{stamp}', f'DTSTART:{start}',
+                      f'DTSTAMP:{stamp}', *starts,
                       f'SUMMARY:{ics_escape(event["title"])}',
                       f'DESCRIPTION:{ics_escape(event.get("description", ""))}',
                       f'URL:{event["official_url"]}', 'TRANSP:TRANSPARENT',
@@ -392,7 +411,7 @@ def make_calendar_feed(upcoming, now):
 
 def week_page(upcoming, now, site_url, indexing_enabled=False):
     end = now + timedelta(days=7)
-    week = [x for x in upcoming if now - timedelta(hours=2) <= x['start_dt'] <= end]
+    week = [x for x in upcoming if x['start_dt'] <= end and x['start_dt'] + (timedelta(days=1) if x.get('date_only') else timedelta(hours=2)) > now]
     rows = '\n'.join(upcoming_card(x) for x in week)
     if not week:
         rows = '<div class="empty">今週の公式確認済みイベントはまだありません。情報が追加され次第掲載します。</div>'
@@ -421,22 +440,24 @@ def upcoming_card(row, compact=False):
     title = esc(short_text(row['title'], 85))
     event_date = row['start_dt'].astimezone(JST)
     day = event_date.strftime('%m/%d') + '(' + '月火水木金土日'[event_date.weekday()] + ')'
-    date = esc(day + event_date.strftime(' %H:%M'))
+    date = esc(day + ('' if row.get('date_only') else event_date.strftime(' %H:%M')))
     category = esc(row.get('category', '予定イベント'))
     summary = esc(short_text(row.get('description', ''), 150))
     source = esc(row['official_url'])
     ics = '/calendar/' + calendar_id(row) + '.ics'
-    attributes = (f'data-category="{category}" data-starts-at="{esc(row["starts_at"])}" '
+    attributes = (f'data-category="{category}" data-starts-at="{esc(row["start_dt"].isoformat())}" '
                   f'data-search="{esc((row["title"] + " " + row.get("description", "")).casefold())}"')
+    reminder_label = 'カレンダーに登録（日付のみ）' if row.get('date_only') else '30分前通知付きでカレンダーに登録'
+    extended_label = 'カレンダーに追加 ↗' if row.get('date_only') else '30分前通知をカレンダーに追加 ↗'
     if compact:
         return f'''<article class="upcoming-card upcoming-card-compact" {attributes}>
 <div class="event-topline"><time datetime="{esc(row['starts_at'])}">{date}</time><span class="event-category">{category}</span></div>
 <h3>{title}</h3>
 <div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer" aria-label="{title}の公式情報を見る">公式情報 ↗</a>
-<a href="{ics}" download aria-label="{title}を30分前通知付きでカレンダーに登録">予定に追加 ＋</a></div></article>'''
+<a href="{ics}" download aria-label="{title}を{reminder_label}">予定に追加 ＋</a></div></article>'''
     return f'''<article class="upcoming-card" {attributes}><div class="upcoming-date">{date}<small>日本時間</small></div><div class="upcoming-info">
 <span class="pill verified">公式情報で確認済み</span> <span class="light-text">{category}</span>
-<h3>{title}</h3><p>{summary}</p><div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer">公式情報を見る ↗</a><a href="{ics}" download>30分前通知をカレンダーに追加 ↗</a></div></div></article>'''
+<h3>{title}</h3><p>{summary}</p><div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer">公式情報を見る ↗</a><a href="{ics}" download>{extended_label}</a></div></div></article>'''
 
 
 def signal_section(signals):
