@@ -89,4 +89,4 @@ GitHub Actionsのスケジュール実行時刻は保証されず、遅延・欠
 - [`METRICS.md`](METRICS.md)：イベント定義、データ品質、評価の手順
 - [`tests`](tests)：ユニットテスト（追加パッケージ不要）
 
-**公開状態（2026-11-15）：** `M-Osugi1230/trend-ahead` の `main` へのソースコード反映は完了。GitHub Actions のユニットテストは成功しています。GitHub Pages は未設定のため公開ワークフローは `Configure GitHub Pages` で失敗しています。Settings → Pages → Build and deployment → Source で **GitHub Actions** を選択してください。実データの継続取得と一般公開URLの稼働確認は未実施です。
+**公開状態（2026-11-15）：** `main` へのv0.3反映、GitHub Pagesデプロイ、公開URLのHTTP疎通テストは成功済みです（[サイト](https://m-osugi1230.github.io/trend-ahead/) / [公開実行ログ](https://github.com/M-Osugi1230/trend-ahead/actions/runs/43722098314)）。Google Trends・ニュースRSSの14/14ソース取得を異なる時刻で2回実施し、履歴データのコミットまで確認しました（[初回収集](https://github.com/M-Osugi1230/trend-ahead/actions/runs/43721780546) / [2回目収集](https://github.com/M-Osugi1230/trend-ahead/actions/runs/43722080142)）。収集成功後に公開を再実行する設定も確認済みです。**検索インデックス許可は未実施（noindexのまま）**。独自のAI予測・通知は未実装、長期安定性と実機UX・運営情報・法的表記の確認はこれからです。
