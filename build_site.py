@@ -576,8 +576,12 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     unique = {}
     for row in sorted(rows, key=lambda r: r['first_seen_at'], reverse=True):
         unique.setdefault(row['event_id'], row)
-    rows = sorted(unique.values(), key=lambda r: r['last_seen_at'], reverse=True)[:MAX_CARDS]
-    signals = detect_signals(data_dir, rows, now)
+    # Signal coverage must not be restricted by the newest 100 news cards.
+    # Otherwise a burst of articles can hide every repeated Google Trends topic.
+    all_observed = sorted(unique.values(), key=lambda r: r['last_seen_at'], reverse=True)
+    signal_candidates = [r for r in all_observed if r['kind'] == 'trends']
+    signals = detect_signals(data_dir, signal_candidates, now)
+    rows = all_observed[:MAX_CARDS]
     upcoming = load_upcoming(data_dir / 'upcoming.json', now)
     health = collection_status(data_dir, now)
     # Avoid deleting arbitrary paths when invoked with an unsafe output argument.
@@ -606,8 +610,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     for row in upcoming:
         write(output / 'calendar' / (calendar_id(row) + '.ics'), make_ics(row, calendar_id(row), now))
     priority_ids = {signal['event_id'] for signal in signals}
-    detail_rows = ([row for row in rows if row['event_id'] in priority_ids]
-                   + [row for row in rows if row['event_id'] not in priority_ids])[:MAX_DETAIL_PAGES]
+    priority_rows = [row for row in signal_candidates if row['event_id'] in priority_ids]
+    detail_rows = (priority_rows + [row for row in rows if row['event_id'] not in priority_ids])[:MAX_DETAIL_PAGES]
     for row in detail_rows:
         write(output / 'topics' / row['event_id'] / 'index.html', page_html(topic_page(row, site_url)))
     write(output / '404.html', page_html(format_page('ページが見つかりません｜Trend Ahead', 'お探しのページは見つかりませんでした。',
