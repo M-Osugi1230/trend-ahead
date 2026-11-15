@@ -1,0 +1,32 @@
+name: Prepare research and outreach review pack
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily 07:15 JST. GitHub schedule execution can be delayed or skipped.
+    - cron: "15 22 * * *"
+permissions:
+  contents: read
+jobs:
+  research-and-drafts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Research-only retrospective evaluation
+        run: python backtest.py --output reports/backtest.json
+      - name: Create review-only Japanese outreach drafts
+        run: python outreach.py --site-url "https://m-osugi1230.github.io/trend-ahead" --output reports/outreach.md
+      - name: Show sample sufficiency, not invented accuracy
+        run: |
+          python -c "import json; p=json.load(open('reports/backtest.json')); print({k:p[k] for k in ('status','labeled_cases','days_with_labels','missing_future_outcomes')})"
+      - name: Archive output for human editorial review
+        uses: actions/upload-artifact@v4
+        with:
+          name: trend-ahead-research-outreach
+          path: reports/
+          retention-days: 14
