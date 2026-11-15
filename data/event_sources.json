@@ -14,5 +14,13 @@
     "kind": "heading_dates",
     "max_candidates": 35,
     "description": "東京ビッグサイト公式イベント一覧。主催者による変更があり得る"
+  },
+  {
+    "id": "makuhari_messe",
+    "url": "https://www.m-messe.co.jp/event/",
+    "category": "季節・イベント",
+    "kind": "date_then_title",
+    "max_candidates": 30,
+    "description": "幕張メッセ公式イベントカレンダー。主催者都合の予定変更に注意"
   }
 ]
