@@ -6,6 +6,8 @@ on:
       - "backtest.py"
       - "outreach.py"
       - "event_audit.py"
+      - "event_discovery.py"
+      - "data/event_sources.json"
       - ".github/workflows/research-outreach.yml"
       - "signal_engine.py"
       - "build_site.py"
