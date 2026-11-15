@@ -1,11 +1,59 @@
 [
   {
+    "title": "スマートファクトリーJapan2026 開幕",
+    "category": "テクノロジー",
+    "description": "東京ビッグサイト。製造業DX・ロボティクスなどの専門展示会。",
+    "starts_at": "2026-11-18T10:00:00+09:00",
+    "official_url": "https://biz.nikkan.co.jp/eve/smart-factory/overview.html",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "映画『魔法使いの夜』公開",
+    "category": "映画・アニメ",
+    "description": "東宝・アニプレックス配給。上映時刻は各映画館の案内を確認。",
+    "starts_at": "2026-11-20",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "『ダンダダン』Animation Works展 新潟開幕",
+    "category": "映画・アニメ",
+    "description": "新潟市マンガ・アニメ情報館。アニメ制作資料を展示。",
+    "starts_at": "2026-11-20T11:00:00+09:00",
+    "official_url": "https://museum.nmam.jp/2026/11/04/dandadan_ex_ngt/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "『可愛いだけじゃない！？ピングー展』福岡開幕",
+    "category": "映画・アニメ",
+    "description": "福岡市科学館で開催。会期は2027年1月11日まで。",
+    "starts_at": "2026-11-21T09:30:00+09:00",
+    "official_url": "https://pingu-exhibit26.jp/news/news_20261010.html",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "テレビ朝日ドリームフェスティバル2026 DAY1",
+    "category": "音楽・ライブ",
+    "description": "Kアリーナ横浜。主な出演：JO1・Aぇ! groupほか。チケットは公式確認（売り切れの場合あり）。",
+    "starts_at": "2026-11-21T15:00:00+09:00",
+    "official_url": "https://dreamfestival.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
     "title": "2026 F1 ラスベガスGP 決勝",
     "category": "スポーツ",
     "description": "現地11月21日20:00開始、日本時間11月22日13:00。タイムゾーンを確認してレース開始に備えましょう。時刻は変更の可能性があります。",
     "starts_at": "2026-11-22T13:00:00+09:00",
     "official_url": "https://www.formula1.com/en/latest/article/formula-1-heineken-las-vegas-grand-prix-2026.1qmWzcBwKK5hkTbYbhVC22",
     "verified_at": "2026-11-15T16:26:11+09:00"
+  },
+  {
+    "title": "テレビ朝日ドリームフェスティバル2026 DAY2",
+    "category": "音楽・ライブ",
+    "description": "Kアリーナ横浜。主な出演：NCT DREAM・INIほか。チケットは公式確認（売り切れの場合あり）。",
+    "starts_at": "2026-11-22T15:00:00+09:00",
+    "official_url": "https://dreamfestival.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
     "title": "第43回 マイルチャンピオンシップ（GⅠ）",
@@ -16,12 +64,132 @@
     "verified_at": "2026-11-15T16:26:11+09:00"
   },
   {
+    "title": "テレビ朝日ドリームフェスティバル2026 DAY3",
+    "category": "音楽・ライブ",
+    "description": "Kアリーナ横浜。主な出演：MAZZEL・NCT WISHほか。チケットは公式確認（売り切れの場合あり）。",
+    "starts_at": "2026-11-23T15:00:00+09:00",
+    "official_url": "https://dreamfestival.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "『Destruction AllStars』オンラインサービス終了",
+    "category": "ゲーム",
+    "description": "PlayStation公式告知。利用者向けサービス終了時刻。",
+    "starts_at": "2026-11-26T00:00:00+09:00",
+    "official_url": "https://www.playstation.com/ja-jp/support/important-notice/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "F1 カタールGP 開催週末",
+    "category": "スポーツ",
+    "description": "11月27〜29日の開催日程。レース開始時刻は公式カレンダーで確認。",
+    "starts_at": "2026-11-27",
+    "official_url": "https://www.formula1.com/en/racing/2026",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "映画『プラクティカル・マジック／魔女たちの秘密』公開",
+    "category": "映画・アニメ",
+    "description": "ワーナー・ブラザース公式公開予定。",
+    "starts_at": "2026-11-27",
+    "official_url": "https://www.warnerbros.co.jp/movie/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "映画『君の話』公開",
+    "category": "映画・アニメ",
+    "description": "ワーナー・ブラザース公式公開予定。",
+    "starts_at": "2026-11-27",
+    "official_url": "https://www.warnerbros.co.jp/movie/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "ロックアンセム EX 2026 DAY1",
+    "category": "音楽・ライブ",
+    "description": "EX THEATER ROPPONGI。OKAMOTO'S／ドレスコーズ／THE BAWDIES出演。",
+    "starts_at": "2026-11-27T19:00:00+09:00",
+    "official_url": "https://rock-anthem.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "あんスタ THE STAGE 10周年衣裳展 前期開幕",
+    "category": "映画・アニメ",
+    "description": "東京アニメセンター、渋谷。前期衣裳展示がスタート。",
+    "starts_at": "2026-11-28T11:00:00+09:00",
+    "official_url": "https://tokyoanimecenter.jp/event/enstage10th_exh/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "ロックアンセム EX 2026 DAY2",
+    "category": "音楽・ライブ",
+    "description": "EX THEATER ROPPONGI。ACIDMAN／ストレイテナー／THE BACK HORN出演。",
+    "starts_at": "2026-11-28T17:00:00+09:00",
+    "official_url": "https://rock-anthem.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
     "title": "第46回 ジャパンカップ（GⅠ）",
     "category": "スポーツ",
     "description": "東京競馬場の12レース、15:40発走予定。JRAのレース日程には変更の可能性が明記されています。",
     "starts_at": "2026-11-29T15:40:00+09:00",
     "official_url": "https://www.jra.go.jp/keiba/calendar2026/2026/11/1129.html",
     "verified_at": "2026-11-15T16:26:11+09:00"
+  },
+  {
+    "title": "ロックアンセム EX 2026 DAY3",
+    "category": "音楽・ライブ",
+    "description": "EX THEATER ROPPONGI。TenTwenty／Base Ball Bear／山内総一郎出演。",
+    "starts_at": "2026-11-29T17:00:00+09:00",
+    "official_url": "https://rock-anthem.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "AWS re:Invent 2026 開幕",
+    "category": "テクノロジー",
+    "description": "クラウド・AI関連の年次イベント。ラスベガス現地開催、基調講演の無料配信あり。",
+    "starts_at": "2026-11-30",
+    "official_url": "https://aws.amazon.com/events/reinvent/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "『ゼノブレイド3 Nintendo Switch 2 Edition』発売",
+    "category": "ゲーム",
+    "description": "任天堂が公表したダウンロード版・パッケージ版の発売日。",
+    "starts_at": "2026-12-03",
+    "official_url": "https://www.nintendo.com/jp/games/switch2/az3hg/products/soft.html",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "F1 アブダビGP 開催週末",
+    "category": "スポーツ",
+    "description": "12月4〜6日の2026年シーズン最終戦。開始時刻は公式案内で確認。",
+    "starts_at": "2026-12-04",
+    "official_url": "https://www.formula1.com/en/racing/2026",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "映画『VIVANT』公開",
+    "category": "映画・アニメ",
+    "description": "東宝の公式ラインナップに掲載された公開予定日。",
+    "starts_at": "2026-12-04",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "チャンピオンズカップ（GⅠ）",
+    "category": "スポーツ",
+    "description": "中京競馬場で開催。発走時刻・出馬表はJRA当日情報を確認。",
+    "starts_at": "2026-12-06",
+    "official_url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "劇場版『薬屋のひとりごと 亡妃の秘宝』公開",
+    "category": "映画・アニメ",
+    "description": "映画の公開予定日。上映時刻は各映画館で確認。",
+    "starts_at": "2026-12-11",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
     "title": "The Game Awards 2026 生配信オープニング",
@@ -38,6 +206,61 @@
     "starts_at": "2026-12-11T11:00:00+09:00",
     "official_url": "https://tokyocomiccon.jp/whatscc",
     "verified_at": "2026-11-15T16:28:20+09:00"
+  },
+  {
+    "title": "あんスタ THE STAGE 10周年衣裳展 後期開幕",
+    "category": "映画・アニメ",
+    "description": "東京アニメセンター、渋谷。後期衣裳展示がスタート。",
+    "starts_at": "2026-12-12T11:00:00+09:00",
+    "official_url": "https://tokyoanimecenter.jp/event/enstage10th_exh/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "2026 MUSIC BANK GLOBAL FESTIVAL IN JAPAN 12/12",
+    "category": "音楽・ライブ",
+    "description": "MUFGスタジアムで開催。開演17:00予定。K-POPグループが出演。",
+    "starts_at": "2026-12-12T17:00:00+09:00",
+    "official_url": "https://www.music-bank.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "阪神ジュベナイルフィリーズ（GⅠ）",
+    "category": "スポーツ",
+    "description": "阪神競馬場で開催予定。発走時刻などは公式案内で確認。",
+    "starts_at": "2026-12-13",
+    "official_url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "2026 MUSIC BANK GLOBAL FESTIVAL IN JAPAN 12/13",
+    "category": "音楽・ライブ",
+    "description": "MUFGスタジアムで開催。開演17:00予定。K-POPグループが出演。",
+    "starts_at": "2026-12-13T17:00:00+09:00",
+    "official_url": "https://www.music-bank.jp/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "映画『デューン 砂の惑星 PART3』公開",
+    "category": "映画・アニメ",
+    "description": "30日超の先の予定。公開日と映画館は原典で再確認。",
+    "starts_at": "2026-12-18",
+    "official_url": "https://www.warnerbros.co.jp/movie/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "ジャンプフェスタ2027 DAY1",
+    "category": "映画・アニメ",
+    "description": "幕張メッセ。入場無料、事前応募・招待制。入場チケット要。",
+    "starts_at": "2026-12-19T09:00:00+09:00",
+    "official_url": "https://www.shonenjump.com/p/re/top/jumpfesta/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "ジャンプフェスタ2027 DAY2",
+    "category": "映画・アニメ",
+    "description": "幕張メッセ。入場無料、事前応募・招待制。入場チケット要。",
+    "starts_at": "2026-12-20T09:00:00+09:00",
+    "official_url": "https://www.shonenjump.com/p/re/top/jumpfesta/",
+    "verified_at": "2026-11-16T07:38:00+09:00"
   }
 ]
-
