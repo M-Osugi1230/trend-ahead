@@ -443,7 +443,7 @@ def signal_section(signals):
         content = '<p class="signal-empty">いまは十分な反復観測がありません。根拠のある兆候が見つかり次第、表示します。</p>'
     return f'''<aside id="signals" class="front-signals" aria-label="急上昇の兆候">
 <div class="front-aside-head"><span class="kicker">SIGNAL WATCH</span><h2>動き始めた話題</h2>
-<p>検索の推定値を複数回観測した候補です。将来の流行を保証する予測ではありません。</p></div>
+<p>検索の推定値を複数回観測した候補です。スコアは予測確率ではありません。</p></div>
 {content}<a class="front-more" href="/#now">いまの話題をもっと見る →</a></aside>'''
 
 
