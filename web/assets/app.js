@@ -91,6 +91,48 @@
     if ($('result-count')) $('result-count').textContent = `${count}件の話題を表示`;
   }
 
+  // Filter upcoming events in-place without a server round-trip.
+  const futureCards = [...document.querySelectorAll('#future-list .upcoming-card')];
+  const futureSearch = $('future-search');
+  const futureCategory = $('future-category');
+  const futureRangeButtons = [...document.querySelectorAll('[data-future-window]')];
+  let futureWindow = 'all';
+
+  function filterFuture() {
+    const query = (futureSearch?.value || '').trim().toLocaleLowerCase();
+    const selected = futureCategory?.value || 'all';
+    const now = Date.now();
+    const horizon = futureWindow === 'all' ? Infinity : Number(futureWindow) * 86400000;
+    let visible = 0;
+    for (const card of futureCards) {
+      const start = Date.parse(card.dataset.startsAt || '');
+      const matchesDate = futureWindow === 'all' ||
+        (Number.isFinite(start) && start >= now && start - now <= horizon);
+      const matchesCategory = selected === 'all' || card.dataset.category === selected;
+      const matchesSearch = !query || (card.dataset.search || '').includes(query);
+      const show = matchesDate && matchesCategory && matchesSearch;
+      card.hidden = !show;
+      if (show) visible++;
+    }
+    const status = $('future-result-status');
+    if (status) status.textContent = String(visible) + '件の予定を表示' +
+      (futureWindow === 'all' ? '' : '（' + futureWindow + '日以内）');
+    const empty = $('future-empty');
+    if (empty) empty.hidden = !(futureCards.length && visible === 0);
+  }
+
+  futureRangeButtons.forEach(button => button.addEventListener('click', () => {
+    futureWindow = button.dataset.futureWindow || 'all';
+    for (const option of futureRangeButtons) {
+      const active = option === button;
+      option.classList.toggle('is-active', active);
+      option.setAttribute('aria-pressed', String(active));
+    }
+    filterFuture();
+  }));
+  futureSearch?.addEventListener('input', filterFuture);
+  futureCategory?.addEventListener('change', filterFuture);
+
   document.addEventListener('click', async ev => {
     const button = ev.target.closest('[data-save]');
     if (button) {
@@ -144,6 +186,7 @@
   window.addEventListener('hashchange', handleHash);
   updateSavedButtons();
   updateInterests();
+  filterFuture();
   handleHash();
 })();
 
