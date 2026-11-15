@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'build_site.py'
+      - 'signal_engine.py'
       - 'web/**'
       - 'data/upcoming.json'
       - '.github/workflows/publish.yml'
