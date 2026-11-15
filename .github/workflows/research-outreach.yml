@@ -1,6 +1,12 @@
 name: Prepare research and outreach review pack
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'backtest.py'
+      - 'outreach.py'
+      - '.github/workflows/research-outreach.yml'
   schedule:
     # Daily 07:15 JST. GitHub schedule execution can be delayed or skipped.
     - cron: "15 22 * * *"
