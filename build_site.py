@@ -30,6 +30,20 @@ CATEGORIES = [
 ]
 MAX_CARDS = 100
 MAX_DETAIL_PAGES = 60
+CALENDAR_FEEDS = {
+    'SNS・ネットミーム': 'sns',
+    'テレビ・芸能': 'television',
+    'ゲーム': 'games',
+    '音楽・ライブ': 'music',
+    'スポーツ': 'sports',
+    '映画・アニメ': 'anime',
+    '配信・YouTuber': 'streaming',
+    'グルメ・商品': 'food',
+    '季節・イベント': 'seasonal',
+    'テクノロジー': 'technology',
+    'ニュース・社会': 'society',
+    'その他の新現象': 'other',
+}
 
 
 def esc(value):
@@ -435,6 +449,30 @@ def week_page(upcoming, now, site_url, indexing_enabled=False):
                        structured_data=structured if week else None)
 
 
+def subscription_page(upcoming, site_url, indexing_enabled=False):
+    """Opt-in calendar subscription links, with explicit external-client limits."""
+    groups = []
+    for name, slug in CALENDAR_FEEDS.items():
+        count = sum(1 for row in upcoming if row.get('category') == name)
+        ics_url = '/calendar/' + slug + '.ics'
+        webcal = site_url.replace('https://', 'webcal://', 1) + ics_url if site_url else ''
+        subscription = (f'<a href="{esc(webcal)}">購読する ↗</a>' if webcal else '')
+        groups.append(f'''<article class="calendar-feed-card">
+<h2>{esc(name)} <small>{count}件</small></h2>
+<div class="calendar-feed-actions">{subscription}<a href="{ics_url}" download>ICSを取得 ↗</a></div></article>''')
+    content = f'''{header()}<main class="content-page wrap subscribe-page">
+<a class="back" href="/">← 予定一覧に戻る</a>
+<span class="kicker">CALENDAR</span><h1>ジャンル別カレンダー</h1>
+<p class="intro">見たい予定だけ購読。新しい公式確認済み予定が追加されると、カレンダーフィードにも反映されます。</p>
+<div class="calendar-feed-list">{''.join(groups)}</div>
+<p class="calendar-feed-note">「購読する」は対応カレンダーアプリで利用できます。同期の間隔・通知の有無はアプリ側の設定次第です。即時プッシュ通知ではありません。日時が未公表の発売日等は終日予定として登録されます。</p>
+</main>{footer()}'''
+    return format_page('ジャンル別カレンダー｜Trend Ahead',
+                       '公式確認済みの予定を、興味のあるジャンルだけカレンダーで購読。',
+                       content, canonical=(site_url + '/subscribe/' if site_url else ''),
+                       noindex=not indexing_enabled)
+
+
 def upcoming_card(row, compact=False):
     """Compact on the homepage; keep expanded description on the weekly page."""
     title = esc(short_text(row['title'], 85))
@@ -544,7 +582,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <div id="future-list" class="front-event-list">{future}</div>
 <p id="future-empty" class="empty" hidden>該当する予定はありません。</p>
 <div class="front-bottom-links"><a href="/week/">今週の予定 →</a>
-<a href="/calendar/upcoming.ics" download>カレンダーに追加 →</a>
+<a href="/calendar/upcoming.ics" download>カレンダーに追加 →</a><a href="/subscribe/">ジャンル別に購読 →</a>
 <button type="button" class="front-share-button" data-share="{esc((site_url or '') + '/')}" data-title="Trend Ahead｜明日の話題を、今日知る。">共有 ↗</button></div>
 </div>{signal_section(signals or [], new_arrivals or [])}</div>
 <details class="front-data-status" data-status="{esc(state)}"><summary>{health_short}</summary>
@@ -660,6 +698,10 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     for name in ('how', 'methodology', 'privacy'):
         write(output / name / 'index.html', page_html(simple_page(name, site_url, indexing_enabled, operator_contact if valid_contact else '')))
     write(output / 'calendar' / 'upcoming.ics', make_calendar_feed(upcoming, now))
+    for category, slug in CALENDAR_FEEDS.items():
+        subset = [row for row in upcoming if row.get('category') == category]
+        write(output / 'calendar' / (slug + '.ics'), make_calendar_feed(subset, now))
+    write(output / 'subscribe' / 'index.html', page_html(subscription_page(upcoming, site_url, indexing_enabled)))
     for row in upcoming:
         write(output / 'calendar' / (calendar_id(row) + '.ics'), make_ics(row, calendar_id(row), now))
     priority_ids = {item['event_id'] for item in (signals + new_arrivals)}
@@ -672,7 +714,7 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     write(output / 'robots.txt', 'User-agent: *\nAllow: /\n' + (f'Sitemap: {site_url}/sitemap.xml\n' if indexing_enabled else ''))
     if indexing_enabled:
         from xml.sax.saxutils import escape as xml_escape
-        paths = ['/', '/how/', '/methodology/', '/privacy/']
+        paths = ['/', '/how/', '/methodology/', '/privacy/', '/subscribe/']
         if any(now - timedelta(hours=2) <= x['start_dt'] <= now + timedelta(days=7) for x in upcoming):
             paths.append('/week/')
         sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(
