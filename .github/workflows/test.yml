@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "collector.py"
+      - "signal_engine.py"
       - "build_site.py"
       - "web/**"
       - "data/upcoming.json"
