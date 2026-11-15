@@ -1,13 +1,5 @@
 [
   {
-    "id": "tokyo_anime_center",
-    "url": "https://tokyoanimecenter.jp/event/",
-    "category": "映画・アニメ",
-    "kind": "heading_dates",
-    "max_candidates": 25,
-    "description": "東京アニメセンター公式の企画展・ポップアップ"
-  },
-  {
     "id": "tokyo_big_sight",
     "url": "https://www.bigsight.jp/visitor/event/",
     "category": "季節・イベント",
