@@ -7,6 +7,8 @@ on:
       - 'backtest.py'
       - 'outreach.py'
       - 'event_audit.py'
+      - 'event_discovery.py'
+      - 'data/event_sources.json'
       - 'data/upcoming.json'
       - '.github/workflows/research-outreach.yml'
   schedule:
@@ -27,6 +29,8 @@ jobs:
           python-version: "3.12"
       - name: Research-only retrospective evaluation
         run: python backtest.py --output reports/backtest.json
+      - name: Discover official events for editorial review only
+        run: python event_discovery.py --json-output reports/event-candidates.json --review-output reports/event-review.md
       - name: Review event catalog freshness and coverage
         run: python event_audit.py --output reports/event-audit.json
       - name: Create review-only Japanese outreach drafts
@@ -34,6 +38,9 @@ jobs:
       - name: Show sample sufficiency, not invented accuracy
         run: |
           python -c "import json; p=json.load(open('reports/backtest.json')); print({k:p[k] for k in ('status','labeled_cases','days_with_labels','missing_future_outcomes')})"
+      - name: Show discovery queue and failed sources
+        run: |
+          python -c "import json; a=json.load(open('reports/event-candidates.json')); print({k:a[k] for k in ('status','sources_ok','sources_total','queued')}); print(a['sources'])"
       - name: Show 30-day event coverage
         run: |
           python -c "import json; a=json.load(open('reports/event-audit.json')); print({k:a[k] for k in ('status','total_curated','future_7_days','future_30_days','target_30_days','missing_categories_30d')})"
