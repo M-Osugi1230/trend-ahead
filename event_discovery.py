@@ -1,0 +1,336 @@
+#!/usr/bin/env python3
+"""Find review-only future event candidates on allowlisted first-party calendars.
+
+No event is automatically published. Candidates do not have verified_at; an
+editor must confirm the organizer's exact date, status and any start time.
+Only public HTTPS pages with a robots permission check are retrieved.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import unicodedata
+import urllib.error
+import urllib.request
+import urllib.robotparser
+from datetime import date, datetime, timedelta, timezone
+from html.parser import HTMLParser
+from pathlib import Path
+from urllib.parse import urljoin, urlsplit
+from zoneinfo import ZoneInfo
+
+JST = ZoneInfo("Asia/Tokyo")
+MAX_RESPONSE_BYTES = 1_200_000
+MAX_SOURCES = 8
+USER_AGENT = "TrendAheadEditorialResearch/0.1 (+https://m-osugi1230.github.io/trend-ahead/)"
+HEADING_TAGS = {"h2", "h3", "h4", "h5"}
+SKIP_TAGS = {"script", "style", "noscript", "svg", "template"}
+JP_DATE = re.compile(
+    r"(?<!\d)(20\d{2})\s*[年./-]\s*(0?[1-9]|1[0-2])\s*[月./-]\s*"
+    r"([0-2]?\d|3[01])\s*日?(?!\d)"
+)
+GENERIC_TITLE = re.compile(
+    r"(イベント(情報|一覧|検索)?|展示一覧|LIST|企画展(&|＆)ストア|NEWS|お知らせ|"
+    r"来場者|EVENTS|前の月|次の月|新着情報|一覧を見る)$",
+    re.IGNORECASE,
+)
+
+
+def normalize(value: str) -> str:
+    return re.sub(r"[\s　「」『』・!！?？:：‘’\"'。、,，._\-—]+", "",
+                  unicodedata.normalize("NFKC", value).casefold())
+
+
+def parse_date(value: str):
+    try:
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            return date.fromisoformat(value)
+        dt = datetime.fromisoformat(value)
+        return dt.astimezone(JST).date() if dt.tzinfo else None
+    except (ValueError, TypeError):
+        return None
+
+
+def allowed_https_url(value: str, expected_hostname: str) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        parsed = urlsplit(value)
+        return (parsed.scheme == "https"
+                and parsed.hostname == expected_hostname
+                and parsed.username is None and parsed.password is None
+                and parsed.port in (None, 443)
+                and not any(ord(ch) < 32 for ch in value))
+    except ValueError:
+        return False
+
+
+class SameHostRedirect(urllib.request.HTTPRedirectHandler):
+    def __init__(self, hostname):
+        self.hostname = hostname
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not allowed_https_url(newurl, self.hostname):
+            raise ValueError("cross-host or unsafe HTTP redirect blocked")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def fetch_official_page(url: str) -> str:
+    """Be polite: robots.txt, one HTML GET, 1.2MB cap, fixed user agent."""
+    parts = urlsplit(url)
+    hostname = parts.hostname
+    if not hostname or not allowed_https_url(url, hostname):
+        raise ValueError("source URL is not an allowlisted HTTPS host")
+    opener = urllib.request.build_opener(SameHostRedirect(hostname))
+    robots_url = "https://" + hostname + "/robots.txt"
+    try:
+        with opener.open(urllib.request.Request(robots_url, headers={"User-Agent": USER_AGENT}),
+                         timeout=12) as response:
+            robots = response.read(150_000).decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as error:
+        if error.code not in (404, 410):
+            raise ValueError("robots policy unavailable: HTTP " + str(error.code)) from error
+        robots = ""
+    # Network failure on robots check is not permission to proceed.
+    parser = urllib.robotparser.RobotFileParser()
+    parser.parse(robots.splitlines())
+    if not parser.can_fetch(USER_AGENT, url):
+        raise ValueError("robots.txt disallows source retrieval")
+    request = urllib.request.Request(url, headers={
+        "User-Agent": USER_AGENT,
+        "Accept": "text/html,application/xhtml+xml",
+    })
+    with opener.open(request, timeout=18) as response:
+        if not allowed_https_url(response.geturl(), hostname):
+            raise ValueError("final source domain changed")
+        content_type = response.headers.get("Content-Type", "").lower()
+        if not ("text/html" in content_type or "application/xhtml+xml" in content_type):
+            raise ValueError("source was not an HTML page")
+        content = response.read(MAX_RESPONSE_BYTES + 1)
+    if len(content) > MAX_RESPONSE_BYTES:
+        raise ValueError("page exceeded bounded fetch size")
+    return content.decode("utf-8", errors="replace")
+
+
+class HeadingTextExtractor(HTMLParser):
+    """Retain human-visible heading/text order without executing scripts."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.blocks = []
+        self.skip_depth = 0
+        self.current_heading = None
+        self.head_parts = []
+        self.raw_text = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in SKIP_TAGS:
+            self.skip_depth += 1
+        if self.skip_depth:
+            return
+        if tag in HEADING_TAGS and self.current_heading is None:
+            self.current_heading = tag
+            self.head_parts = []
+
+    def handle_endtag(self, tag):
+        if self.skip_depth:
+            if tag in SKIP_TAGS:
+                self.skip_depth -= 1
+            return
+        if self.current_heading == tag:
+            title = " ".join(self.head_parts)
+            title = re.sub(r"\s+", " ", title).strip()
+            if title:
+                self.blocks.append(("heading", title))
+            self.current_heading = None
+            self.head_parts = []
+
+    def handle_data(self, data):
+        if self.skip_depth:
+            return
+        stripped = re.sub(r"\s+", " ", data).strip()
+        if not stripped:
+            return
+        if self.current_heading:
+            self.head_parts.append(stripped)
+        else:
+            self.blocks.append(("text", stripped))
+
+
+def candidate_from_heading(title, following, source, now):
+    title = re.sub(r"\s+", " ", title).strip()
+    if not 7 <= len(title) <= 150 or GENERIC_TITLE.fullmatch(title):
+        return None
+    # Capture the FIRST date after the heading; never infer time from venue hours.
+    match = JP_DATE.search(following)
+    if not match:
+        return None
+    try:
+        starts = date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+    except ValueError:
+        return None
+    today = now.astimezone(JST).date()
+    if not today <= starts <= today + timedelta(days=90):
+        return None
+    source_url = source["url"]
+    normalized_title = normalize(title)
+    if len(normalized_title) < 5:
+        return None
+    identity = f'{source["id"]}|{normalized_title}|{starts.isoformat()}'
+    return {
+        "candidate_id": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20],
+        "title": title,
+        "starts_at": starts.isoformat(),
+        "category": source["category"],
+        "official_url": source_url,
+        "source_id": source["id"],
+        "evidence": "掲載日：" + match.group(0).strip(),
+        "discovered_at": now.isoformat(),
+        "status": "needs_review",
+        "notes": "公式掲載の開始日候補。時間・中止・重複は人が確認",
+    }
+
+
+def extract_heading_dates(html: str, source: dict, now: datetime):
+    parser = HeadingTextExtractor()
+    parser.feed(html)
+    blocks = parser.blocks
+    found = []
+    seen = set()
+    for i, (kind, value) in enumerate(blocks):
+        if kind != "heading":
+            continue
+        parts = []
+        # Tight bounds avoid accidentally pairing a heading with a later event.
+        for nxt_kind, nxt_value in blocks[i + 1:i + 55]:
+            if nxt_kind == "heading":
+                break
+            parts.append(nxt_value)
+            if sum(map(len, parts)) > 400:
+                break
+        candidate = candidate_from_heading(value, " ".join(parts), source, now)
+        if candidate and candidate["candidate_id"] not in seen:
+            seen.add(candidate["candidate_id"])
+            found.append(candidate)
+        if len(found) >= source.get("max_candidates", 25):
+            break
+    return found
+
+
+def match_curated(candidate: dict, curated: list):
+    # Only exact same normalized titles/dates can be confidently de-duplicated.
+    match_title = normalize(candidate["title"])
+    for row in curated:
+        official_title = normalize(str(row.get("title", "")))
+        official_date = parse_date(str(row.get("starts_at", "")))
+        if official_date and official_date.isoformat() == candidate["starts_at"]:
+            if match_title == official_title:
+                return "exact_curated"
+            if len(match_title) >= 9 and len(official_title) >= 9:
+                if match_title in official_title or official_title in match_title:
+                    return "possible_curated"
+    return None
+
+
+def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official_page):
+    if now.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+    candidates = []
+    results = []
+    seen = set()
+    for source in sources[:MAX_SOURCES]:
+        source_id = str(source.get("id", "invalid"))
+        url = str(source.get("url", ""))
+        hostname = urlsplit(url).hostname
+        if (not hostname or not allowed_https_url(url, hostname)
+                or source.get("kind") != "heading_dates"
+                or source.get("category") is None
+                or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
+            results.append({"source_id": source_id, "status": "invalid_config"})
+            continue
+        try:
+            html = fetcher(url)
+            rows = extract_heading_dates(html, source, now)
+            added = 0
+            for item in rows:
+                if item["candidate_id"] in seen:
+                    continue
+                seen.add(item["candidate_id"])
+                item["match_curated"] = match_curated(item, curated)
+                if item["match_curated"] == "exact_curated":
+                    continue
+                candidates.append(item)
+                added += 1
+            results.append({"source_id": source_id, "status": "ok",
+                            "extracted": len(rows), "queued": added})
+        except (ValueError, OSError, urllib.error.URLError) as error:
+            results.append({"source_id": source_id, "status": "fetch_or_parse_error",
+                            "reason": str(error)[:180]})
+    candidates.sort(key=lambda c: (c["starts_at"], c["source_id"], c["title"]))
+    ok = sum(item["status"] == "ok" for item in results)
+    return {
+        "generated_at": now.isoformat(),
+        "status": "ok" if ok == len(results) else ("partial" if ok else "unavailable"),
+        "sources_total": len(results), "sources_ok": ok,
+        "queued": len(candidates),
+        "candidates": candidates,
+        "sources": results,
+        "publication": "manual_editorial_review_only",
+    }
+
+
+def review_markdown(report):
+    lines = [
+        "# 公式イベント候補・編集審査キュー",
+        "",
+        "これらの候補は**未確認・未公開**。公式ページを開いて名称・日付・時刻・"
+        "中止・主催者・ジャンル・重複をチェックするまで公開データに追加しない。",
+        "",
+        f"生成：{report['generated_at']} ／ 候補 {report['queued']}件"
+        f" ／ 情報源成功 {report['sources_ok']}/{report['sources_total']}",
+        "",
+    ]
+    for item in report["candidates"]:
+        lines.extend([
+            f"- [ ] {item['starts_at']}｜{item['title']}（{item['category']}）",
+            f"  - 出典：{item['official_url']}",
+            f"  - 抽出根拠：{item['evidence']} ／ ID: {item['candidate_id']}",
+            f"  - 既存掲載との重複疑い：{item['match_curated'] or '不明・要確認'}",
+            "  - 確認後にのみ、正確な個別主催者URLとverified_atを付与",
+        ])
+    if not report["candidates"]:
+        lines.append("今回の候補は0件です。情報源の到達状況・抽出件数を下記で確認。")
+    lines.extend(["", "## 情報源の状態", ""])
+    for row in report["sources"]:
+        lines.append(f"- {row['source_id']}: {row['status']}"
+                     f"／抽出 {row.get('extracted', '?')}件"
+                     f"／追加 {row.get('queued', '?')}件"
+                     + (f"／{row['reason']}" if row.get("reason") else ""))
+    lines.append("")
+    return "\n".join(lines)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate editorial-only event discovery queue")
+    parser.add_argument("--sources", type=Path, default=Path("data/event_sources.json"))
+    parser.add_argument("--curated", type=Path, default=Path("data/upcoming.json"))
+    parser.add_argument("--json-output", type=Path, default=Path("reports/event-candidates.json"))
+    parser.add_argument("--review-output", type=Path, default=Path("reports/event-review.md"))
+    args = parser.parse_args()
+    sources = json.loads(args.sources.read_text(encoding="utf-8"))
+    curated = json.loads(args.curated.read_text(encoding="utf-8"))
+    if not isinstance(sources, list) or not isinstance(curated, list):
+        raise ValueError("sources and curated must be JSON arrays")
+    report = discover(sources, curated, datetime.now(timezone.utc))
+    args.json_output.parent.mkdir(parents=True, exist_ok=True)
+    args.json_output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+                                encoding="utf-8")
+    args.review_output.parent.mkdir(parents=True, exist_ok=True)
+    args.review_output.write_text(review_markdown(report), encoding="utf-8")
+    print(json.dumps({k: report[k] for k in ("status", "sources_ok", "sources_total", "queued")},
+                     ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()
