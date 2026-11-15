@@ -401,7 +401,7 @@ def week_page(upcoming, now, site_url, indexing_enabled=False):
 <span class="kicker">THIS WEEK</span><h1>今週の注目予定</h1><p class="intro">{summary}</p>
 <p class="week-note">掲載基準：公式情報に日時と出典を確認できたもの。SNSで話題になる確率を推定したランキングではありません。</p>
 <div class="upcoming-list">{rows}</div>
-<p><a class="ghost-btn" href="/calendar/upcoming.ics" download>予定をまとめてカレンダーに追加 →</a></p>
+<p><a class="ghost-btn" href="/calendar/upcoming.ics" download>予定をまとめてカレンダーに追加 →</a> <button type="button" class="ghost-btn" data-share="{esc((site_url or '') + '/week/')}" data-title="今週の注目予定｜Trend Ahead">この予定を友達に共有 ↗</button></p>
 </main>{footer()}"""
     structured = {'@context': 'https://schema.org', '@type': 'ItemList',
                   'name': '今週の公式確認済みイベント',
@@ -462,7 +462,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <section class="hero"><div class="wrap hero-grid"><div><p class="eyebrow">DISCOVER WHAT'S NEXT <span class="live-dot"></span></p>
 <h1>明日の話題を、<br><em>今日知る。</em></h1>
 <p class="lead">寝る前に「今日、そんな面白いことがあったの？」と思う前に。<br>世の中の注目トピックをひとつの場所で見つけて、次の盛り上がりに参加しよう。</p>
-<div class="hero-actions"><a class="primary-btn" href="#now">いまの注目を見る <span>↗</span></a><a class="ghost-btn" href="/week/">今週の予定 →</a></div>
+<div class="hero-actions"><a class="primary-btn" href="#now">いまの注目を見る <span>↗</span></a><a class="ghost-btn" href="/week/">今週の予定 →</a><button type="button" class="ghost-btn" data-share="{esc((site_url or '') + '/')}" data-title="Trend Ahead｜明日の話題を、今日知る。">このサービスを共有 ↗</button></div>
 <p class="hero-note">登録不要・無料で閲覧できます。表示は事実確認済みの予測ではなく、検知した候補と確認済みの予定を区別しています。</p>
 </div><div class="hero-panel" aria-label="サービスの仕組み"><div class="panel-top"><span class="panel-kicker">THE SIGNAL</span><span class="small-indicator">● EARLY SIGNALS</span></div>
 <div class="panel-copy">いま話題になり始めたこと。<br><strong>これから話題になるかもしれないこと。</strong></div>
