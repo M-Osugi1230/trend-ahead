@@ -103,7 +103,7 @@ def load_upcoming(path, now):
         except (ValueError, TypeError):
             continue
         results.append({**row, 'official_url': url, 'start_dt': start, 'date_only': date_only})
-    return sorted(results, key=lambda r: r['start_dt'])[:30]
+    return sorted(results, key=lambda r: r['start_dt'])[:60]
 
 
 def collection_status(data_dir, now):
