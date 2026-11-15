@@ -76,7 +76,7 @@ class SignalsTest(unittest.TestCase):
             home = (root / "dist/index.html").read_text()
             payload = json.loads((root / "dist/signals.json").read_text())
             self.assertEqual(report["signals_count"], 1)
-            self.assertIn("盛り上がりの兆候を追う", home)
+            self.assertIn("動き始めた話題", home)
             self.assertIn("RSS推定検索量 200+ → 500+", home)
             self.assertIn("A &amp; B", home)
             self.assertIn("予測確率ではありません", home)
