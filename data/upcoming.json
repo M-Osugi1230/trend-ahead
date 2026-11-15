@@ -1,0 +1,43 @@
+[
+  {
+    "title": "2026 F1 ラスベガスGP 決勝",
+    "category": "スポーツ",
+    "description": "現地11月21日20:00開始、日本時間11月22日13:00。タイムゾーンを確認してレース開始に備えましょう。時刻は変更の可能性があります。",
+    "starts_at": "2026-11-22T13:00:00+09:00",
+    "official_url": "https://www.formula1.com/en/latest/article/formula-1-heineken-las-vegas-grand-prix-2026.1qmWzcBwKK5hkTbYbhVC22",
+    "verified_at": "2026-11-15T16:26:11+09:00"
+  },
+  {
+    "title": "第43回 マイルチャンピオンシップ（GⅠ）",
+    "category": "スポーツ",
+    "description": "京都競馬場の11レース、15:40発走予定。最終的な開催・発走情報はJRAの当日案内で再確認できます。",
+    "starts_at": "2026-11-22T15:40:00+09:00",
+    "official_url": "https://www.jra.go.jp/keiba/calendar2026/2026/11/1122.html",
+    "verified_at": "2026-11-15T16:26:11+09:00"
+  },
+  {
+    "title": "第46回 ジャパンカップ（GⅠ）",
+    "category": "スポーツ",
+    "description": "東京競馬場の12レース、15:40発走予定。JRAのレース日程には変更の可能性が明記されています。",
+    "starts_at": "2026-11-29T15:40:00+09:00",
+    "official_url": "https://www.jra.go.jp/keiba/calendar2026/2026/11/1129.html",
+    "verified_at": "2026-11-15T16:26:11+09:00"
+  },
+  {
+    "title": "The Game Awards 2026 生配信オープニング",
+    "category": "ゲーム",
+    "description": "米東部時間12月10日19:30からオープニング。日本時間12月11日9:30に相当します。受賞発表やゲーム新情報に注目。",
+    "starts_at": "2026-12-11T09:30:00+09:00",
+    "official_url": "https://thegameawards.com/faq",
+    "verified_at": "2026-11-15T16:26:11+09:00"
+  },
+  {
+    "title": "東京コミコン2026 開幕",
+    "category": "映画・アニメ",
+    "description": "幕張メッセで12月11日11:00に開幕。13日まで開催予定。映画・コミック・海外ゲストなどの展示や企画が予定されています。",
+    "starts_at": "2026-12-11T11:00:00+09:00",
+    "official_url": "https://tokyocomiccon.jp/whatscc",
+    "verified_at": "2026-11-15T16:28:20+09:00"
+  }
+]
+

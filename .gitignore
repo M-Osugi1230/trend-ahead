@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+.env
+*.tmp
+data/events/
+data/observations/
+data/runs/
+data/state.json
+

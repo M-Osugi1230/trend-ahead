@@ -1,0 +1,57 @@
+name: Publish Trend Ahead
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'build_site.py'
+      - 'web/**'
+      - 'data/upcoming.json'
+      - '.github/workflows/publish.yml'
+  schedule:
+    - cron: '12 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: trend-ahead-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Build static site
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          PUBLISH_READY: ${{ vars.PUBLISH_READY }}
+          OPERATOR_CONTACT: ${{ vars.OPERATOR_CONTACT }}
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          fi
+          python build_site.py --site-url "$SITE_URL" --output dist
+      - name: Upload static site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+

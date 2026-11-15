@@ -1,0 +1,17 @@
+[
+  {"id":"google_trends_jp","kind":"trends","category":"全般","url":"https://trends.google.com/trending/rss?geo=JP"},
+  {"id":"news_top","kind":"news","category":"全般","url":"https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_sns","kind":"news","category":"SNS・ネットミーム","url":"https://news.google.com/rss/search?q=SNS%20%E8%A9%B1%E9%A1%8C%20%E6%B5%81%E8%A1%8C&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_entertainment","kind":"news","category":"テレビ・芸能","url":"https://news.google.com/rss/search?q=%E8%8A%B8%E8%83%BD%20%E3%83%86%E3%83%AC%E3%83%93&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_game","kind":"news","category":"ゲーム","url":"https://news.google.com/rss/search?q=%E3%82%B2%E3%83%BC%E3%83%A0%20%E6%96%B0%E4%BD%9C&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_music","kind":"news","category":"音楽・ライブ","url":"https://news.google.com/rss/search?q=%E9%9F%B3%E6%A5%BD%20%E3%83%A9%E3%82%A4%E3%83%96&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_sports","kind":"news","category":"スポーツ","url":"https://news.google.com/rss/search?q=%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%84&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_anime","kind":"news","category":"映画・アニメ","url":"https://news.google.com/rss/search?q=%E6%98%A0%E7%94%BB%20%E3%82%A2%E3%83%8B%E3%83%A1&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_stream","kind":"news","category":"配信・YouTuber","url":"https://news.google.com/rss/search?q=YouTuber%20%E9%85%8D%E4%BF%A1&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_food","kind":"news","category":"グルメ・商品","url":"https://news.google.com/rss/search?q=%E6%96%B0%E7%99%BA%E5%A3%B2%20%E3%82%B0%E3%83%AB%E3%83%A1&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_events","kind":"news","category":"季節・イベント","url":"https://news.google.com/rss/search?q=%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88%20%E7%A5%AD%E3%82%8A&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_tech","kind":"news","category":"テクノロジー","url":"https://news.google.com/rss/search?q=AI%20%E3%83%86%E3%82%AF%E3%83%8E%E3%83%AD%E3%82%B8%E3%83%BC&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_society","kind":"news","category":"ニュース・社会","url":"https://news.google.com/rss/search?q=%E7%A4%BE%E4%BC%9A%20%E8%A9%B1%E9%A1%8C&hl=ja&gl=JP&ceid=JP:ja"},
+  {"id":"news_misc","kind":"news","category":"その他の新現象","url":"https://news.google.com/rss/search?q=%E8%A9%B1%E9%A1%8C%20%E3%83%88%E3%83%AC%E3%83%B3%E3%83%89&hl=ja&gl=JP&ceid=JP:ja"}
+]
+
