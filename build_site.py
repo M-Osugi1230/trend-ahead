@@ -20,6 +20,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
+from signal_engine import detect_signals
+
 JST = ZoneInfo('Asia/Tokyo')
 CATEGORIES = [
     'SNS・ネットミーム', 'テレビ・芸能', 'ゲーム', '音楽・ライブ', 'スポーツ',
@@ -426,7 +428,28 @@ def upcoming_card(row):
 <h3>{title}</h3><p>{summary}</p><div class="upcoming-actions"><a href="{source}" target="_blank" rel="noopener noreferrer">公式情報を見る ↗</a><a href="{ics}" download>30分前通知をカレンダーに追加 ↗</a></div></div></article>'''
 
 
-def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False):
+def signal_section(signals):
+    """Display explainable RSS observations, never false predictive odds."""
+    if signals:
+        articles = []
+        for signal in signals:
+            url = '/topics/' + esc(signal['event_id']) + '/'
+            articles.append(f'''<article><span class="feature-num">{esc(signal['label'])}</span>
+<h3><a href="{url}">{esc(short_text(signal['title'], 75))} →</a></h3>
+<p>{esc(signal['evidence'])}</p>
+<p>観測指標 {signal['score']}/100（予測確率ではありません）</p>
+</article>''')
+        content = '<div class="feature-grid">' + '\n'.join(articles) + '</div>'
+    else:
+        content = '<div class="empty">十分な複数回観測がまだありません。推定検索量の変化が確認できたら表示します。</div>'
+    return f'''<section id="signals" class="section wrap"><div class="section-header"><div>
+<span class="kicker">SIGNAL WATCH</span><h2>盛り上がりの兆候を追う</h2>
+<p>Google Trends RSSの同一トピックを複数回観測し、検索量の推定値の変化を確認しています。\
+観測指標は内部の並べ替え用で、将来の人気や流行の確率を予測するものではありません。</p>
+</div></div>{content}</section>'''
+
+
+def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None):
     cards = '\n'.join(card(row) for row in rows) if rows else '<div class="empty">現在、表示できる観測候補はありません。データの取得後に自動更新されます。<br><small>予測を捏造したり、古い話題を最新として掲載することはありません。</small></div>'
     future = '\n'.join(upcoming_card(x) for x in upcoming) if upcoming else '<div class="empty upcoming-empty">確認済みの予定イベントは準備中です。開催日や内容を公式ソースで確認できたものから掲載します。</div>'
     updated = esc(now.astimezone(JST).strftime('%Y年%m月%d日 %H:%M'))
@@ -447,6 +470,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False):
 <div class="signal"><span class="signal-icon">02</span><span>見極める</span><span class="signal-bar sb2"></span></div>
 <div class="signal"><span class="signal-icon">03</span><span>楽しむ</span><span class="signal-bar sb3"></span></div>
 <div class="panel-foot">KNOW IT BEFORE YOU MISS IT.</div></div></div></section>
+{signal_section(signals or [])}
 <section id="now" class="section wrap"><div class="section-header"><div><span class="kicker">01 / NOW</span><h2>いま、注目されている話題</h2><p>検索急上昇とニュース掲載を観測した候補です。盛り上がりの予測が確定したものではありません。</p></div><div class="updated">画面生成：{updated} JST</div></div>
 {rss_buttons}
 <div class="collection-health" role="status" data-status="{esc(health['status'])}">{health_text}　<span>画面生成：{updated} JST</span></div>
@@ -531,6 +555,7 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     for row in sorted(rows, key=lambda r: r['first_seen_at'], reverse=True):
         unique.setdefault(row['event_id'], row)
     rows = sorted(unique.values(), key=lambda r: r['last_seen_at'], reverse=True)[:MAX_CARDS]
+    signals = detect_signals(data_dir, rows, now)
     upcoming = load_upcoming(data_dir / 'upcoming.json', now)
     health = collection_status(data_dir, now)
     # Avoid deleting arbitrary paths when invoked with an unsafe output argument.
@@ -549,7 +574,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         if base_path:
             return content.replace('href="/', f'href="{base_path}/').replace('src="/', f'src="{base_path}/')
         return content
-    write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled)))
+    write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals)))
+    write(output / 'signals.json', json.dumps({'generated_at': now.isoformat(), 'signals': signals, 'note': 'Observation-only; not a forecast probability.'}, ensure_ascii=False, indent=2) + '\n')
     create_subscription_feeds(output, rows, upcoming, now, site_url)
     write(output / 'week' / 'index.html', page_html(week_page(upcoming, now, site_url, indexing_enabled)))
     for name in ('how', 'methodology', 'privacy'):
@@ -557,7 +583,10 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     write(output / 'calendar' / 'upcoming.ics', make_calendar_feed(upcoming, now))
     for row in upcoming:
         write(output / 'calendar' / (calendar_id(row) + '.ics'), make_ics(row, calendar_id(row), now))
-    for row in rows[:MAX_DETAIL_PAGES]:
+    priority_ids = {signal['event_id'] for signal in signals}
+    detail_rows = ([row for row in rows if row['event_id'] in priority_ids]
+                   + [row for row in rows if row['event_id'] not in priority_ids])[:MAX_DETAIL_PAGES]
+    for row in detail_rows:
         write(output / 'topics' / row['event_id'] / 'index.html', page_html(topic_page(row, site_url)))
     write(output / '404.html', page_html(format_page('ページが見つかりません｜Trend Ahead', 'お探しのページは見つかりませんでした。',
         f'{header()}<main class="content-page wrap"><h1>ページが見つかりません</h1><p>URLをご確認ください。</p><a class="primary-btn" href="/">ホームに戻る</a></main>{footer()}', noindex=True)))
@@ -570,8 +599,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(
             f'<url><loc>{xml_escape(site_url + p)}</loc></url>\n' for p in paths) + '</urlset>\n'
         write(output / 'sitemap.xml', sitemap)
-    write(output / 'build-meta.json', json.dumps({'built_at': now.isoformat(), 'observed_cards': len(rows), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'canonical_configured': bool(site_url), 'indexing_enabled': indexing_enabled, 'collection_status': health}, ensure_ascii=False, indent=2) + '\n')
-    return {'observed_cards': len(rows), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'output': str(output), 'canonical_configured': bool(site_url), 'collection': health}
+    write(output / 'build-meta.json', json.dumps({'built_at': now.isoformat(), 'observed_cards': len(rows), 'signals_count': len(signals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'canonical_configured': bool(site_url), 'indexing_enabled': indexing_enabled, 'collection_status': health}, ensure_ascii=False, indent=2) + '\n')
+    return {'observed_cards': len(rows), 'signals_count': len(signals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'output': str(output), 'canonical_configured': bool(site_url), 'collection': health}
 
 
 def main():
