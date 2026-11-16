@@ -96,5 +96,15 @@
     "season_year": 2027,
     "max_candidates": 30,
     "description": "日本サッカー協会（JFA）SAMURAI BLUE公式2027年試合日程。日付はJST、キックオフは別途確認。中止・延期・試合終了行を未公開候補へ登録しない。対戦相手未定を補完しない。"
+  },
+  {
+    "id": "jfa_nadeshiko_2026",
+    "url": "https://www.jfa.jp/nadeshikojapan/schedule_result/2026.html",
+    "category": "スポーツ",
+    "kind": "jfa_schedule_table",
+    "team_name": "なでしこジャパン",
+    "season_year": 2026,
+    "max_candidates": 30,
+    "description": "なでしこジャパン公式2026年試合日程。日付はJST、対戦相手・大会・終了済みを区別し、未公開の審査候補だけ生成。"
   }
 ]
