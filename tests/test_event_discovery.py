@@ -7,6 +7,7 @@ from pathlib import Path
 from event_discovery import (
     allowed_https_url, candidate_from_heading, discover, extract_heading_dates,
     match_curated, normalize, review_markdown, extract_date_title_rows,
+    extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
 )
 
 NOW = datetime(2026, 11, 16, 8, tzinfo=timezone(timedelta(hours=9)))
@@ -114,6 +115,73 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(rows[0]["starts_at"], "2026-11-22")
         self.assertEqual(rows[1]["title"], "Inter BEE 2026")
         self.assertFalse(any("verified_at" in row for row in rows))
+
+    def test_toho_official_title_before_date(self):
+        source = {"id": "toho_movies", "url": "https://www.toho.co.jp/movie/lineup/",
+                  "category": "映画・アニメ", "kind": "movie_title_date"}
+        html = """<ul><li><a>魔法使いの夜</a><span>2026年11月20日（金）公開</span></li>
+        <li><a>映画「SUKIYAKI 上を向いて歩こう」</a><p>2026年12月25日（金）公開</p></li>
+        <li><a>すでに公開済みの映画</a><p>2026年10月2日公開</p></li>
+        <li><a>公開日未定の作品</a><p>2027年公開</p></li></ul>"""
+        rows = extract_movie_title_date(html, source, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["title"], "魔法使いの夜")
+        self.assertEqual(rows[0]["starts_at"], "2026-11-20")
+        self.assertEqual(rows[1]["starts_at"], "2026-12-25")
+        self.assertEqual(rows[0]["event_type"], "movie_release")
+        self.assertNotIn("verified_at", rows[0])
+
+    def test_warner_official_date_before_title(self):
+        source = {"id": "warner_movies", "url": "https://www.warnerbros.co.jp/movie/",
+                  "category": "映画・アニメ", "kind": "movie_date_title"}
+        html = """<ul>
+          <li>2026年11月27日（金）公開映画『君の話』近日公開</li>
+          <li>2026年12月25日（金）公開映画『キャット・イン・ザ・ハット』近日公開</li>
+          <li>2026年9月30日（水）公開映画『旧作』公開中</li>
+          <li>映画『未発表作品』近日公開</li>
+        </ul>"""
+        rows = extract_movie_date_title(html, source, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["title"], "君の話")
+        self.assertEqual(rows[1]["starts_at"], "2026-12-25")
+        self.assertEqual(rows[1]["event_type"], "movie_release")
+
+    def test_arena_calendar_month_day_and_private_entries(self):
+        source = {"id": "pia_arena", "url": "https://pia-arena-mm.jp/event/index.html",
+                  "category": "音楽・ライブ", "kind": "arena_month_day"}
+        html = """<h2>2026</h2><ul>
+        <li>11.18 WED TOMOO TOMOO Arena Tour 2026</li>
+        <li>11.21 SAT M!LK ARENA TOUR 2026-2027 「シャカリキレボリューション」</li>
+        <li>11.22 SUN PRIVATE</li>
+        <li>12.04 FRI 米津玄師 YONEZU LIVE TOUR</li>
+        <li>01.02 SAT 2027年 新年ライブ</li>
+        <li>08.20 THU 過去公演</li>
+        </ul>"""
+        rows = extract_arena_month_day(html, source, NOW)
+        self.assertEqual(len(rows), 4)
+        self.assertEqual(rows[0]["title"], "TOMOO TOMOO Arena Tour 2026")
+        self.assertEqual(rows[0]["starts_at"], "2026-11-18")
+        self.assertEqual(rows[2]["starts_at"], "2026-12-04")
+        self.assertEqual(rows[3]["starts_at"], "2027-01-02")
+        self.assertEqual(rows[0]["event_type"], "concert")
+        self.assertNotIn("verified_at", rows[0])
+
+    def test_five_source_kinds_run_through_review_queue(self):
+        sources = [
+            {"id": "toho_movies", "url": "https://www.toho.co.jp/movie/lineup/",
+             "category": "映画・アニメ", "kind": "movie_title_date"},
+            {"id": "pia_arena", "url": "https://pia-arena-mm.jp/event/index.html",
+             "category": "音楽・ライブ", "kind": "arena_month_day"},
+        ]
+        def fixture_fetch(url):
+            if "toho" in url:
+                return "<ul><li>話題の新作映画公開 2026年12月20日（日）公開</li></ul>"
+            return "<ul><li>11.22 SUN LIVE MUSIC CONCERT 2026</li></ul>"
+        report = discover(sources, [], NOW, fixture_fetch)
+        self.assertEqual(report["sources_ok"], 2)
+        self.assertEqual(report["queued"], 2)
+        self.assertTrue(all(x["status"] == "needs_review" for x in report["candidates"]))
+        self.assertTrue(all("verified_at" not in x for x in report["candidates"]))
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
