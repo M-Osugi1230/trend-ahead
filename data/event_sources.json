@@ -40,15 +40,6 @@
     "description": "ぴあアリーナMM公式の開催予定。公演時刻や入場可否は個別に確認"
   },
   {
-    "id": "jra_g1",
-    "url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
-    "category": "スポーツ",
-    "kind": "jra_g1_table",
-    "season_year": 2026,
-    "max_candidates": 20,
-    "description": "JRA公式GⅠ日程。開始時刻は別途確認、審査前候補のみ"
-  },
-  {
     "id": "k_arena",
     "url": "https://k-arena.com/schedule/",
     "category": "音楽・ライブ",
@@ -63,5 +54,13 @@
     "kind": "zepp_schedule",
     "max_candidates": 35,
     "description": "Zepp Shinjuku公式公演日程。チケット購入条件は個別に審査"
+  },
+  {
+    "id": "zepp_divercity",
+    "url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "category": "音楽・ライブ",
+    "kind": "zepp_schedule",
+    "max_candidates": 30,
+    "description": "Zepp DiverCity Tokyo公式ライブ日程。すべて未審査候補"
   }
 ]
