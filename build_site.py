@@ -21,6 +21,7 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from signal_engine import detect_signals
+from announced_windows import load_announced_windows
 
 JST = ZoneInfo('Asia/Tokyo')
 CATEGORIES = [
@@ -548,7 +549,24 @@ def signal_section(signals, new_arrivals=None):
 {content}<details class="signal-method"><summary>判定方法</summary><p>RSSの推定検索量を繰り返し観測しています。スコアは予測確率ではありません。</p></details><a class="front-more" href="/#now">もっと見る →</a></aside>'''
 
 
-def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None, new_arrivals=None):
+def announcement_section(announcements):
+    """Verified month-only announcements, never represented as dated calendar events."""
+    if not announcements:
+        return ''
+    items = []
+    for row in announcements:
+        items.append(f'''<article class="announcement-item">
+<div class="announcement-time">{esc(row['period_label'])} <span>日付未発表</span></div>
+<h3>{esc(short_text(row['title'], 75))}</h3>
+<a href="{esc(row['official_url'])}" target="_blank" rel="noopener noreferrer">公式情報 ↗</a></article>''')
+    return f'''<section class="announced-teasers" id="announcements" aria-label="日付未発表の公式予告">
+<div class="front-aside-head"><h2>もう少し先の予告</h2></div>
+<div class="announcement-list">{''.join(items)}</div>
+<p class="announcement-caveat">放送月のみ公式発表。日付・時刻は未発表のため予定登録はできません。</p>
+</section>'''
+
+
+def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, signals=None, new_arrivals=None, announcements=None):
     cards = '\n'.join(card(row) for row in rows) if rows else '<div class="empty">現在、表示できる観測候補はありません。</div>'
     future = '\n'.join(upcoming_card(x, compact=True) for x in upcoming) if upcoming else '<div class="empty upcoming-empty">確認済みの予定イベントは準備中です。</div>'
     updated = esc(now.astimezone(JST).strftime('%m/%d %H:%M'))
@@ -586,7 +604,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <div class="front-bottom-links"><a href="/week/">今週の予定 →</a>
 <a href="/calendar/upcoming.ics" download>カレンダーに追加 →</a><a href="/subscribe/">ジャンル別に購読 →</a>
 <button type="button" class="front-share-button" data-share="{esc((site_url or '') + '/')}" data-title="Trend Ahead｜明日の話題を、今日知る。">共有 ↗</button></div>
-</div>{signal_section(signals or [], new_arrivals or [])}</div>
+</div><div class="front-side">{signal_section(signals or [], new_arrivals or [])}{announcement_section(announcements or [])}</div></div>
 <details class="front-data-status" data-status="{esc(state)}"><summary>{health_short}</summary>
 <p>{health_text} <a href="/methodology/">データと検知方法</a></p></details>
 </div></section>
@@ -676,6 +694,7 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
     new_arrivals = recent_new_trends(signal_candidates, now) if not signals else []
     rows = all_observed[:MAX_CARDS]
     upcoming = load_upcoming(data_dir / 'upcoming.json', now)
+    announcements = load_announced_windows(data_dir / 'announced_windows.json', now)
     health = collection_status(data_dir, now)
     # Avoid deleting arbitrary paths when invoked with an unsafe output argument.
     output = output.resolve()
@@ -693,7 +712,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         if base_path:
             return content.replace('href="/', f'href="{base_path}/').replace('src="/', f'src="{base_path}/')
         return content
-    write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals, new_arrivals)))
+    write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals, new_arrivals, announcements)))
+    write(output / 'announcements.json', json.dumps({'generated_at': now.isoformat(), 'precision': 'month_only', 'announcements': announcements, 'note': 'These records do not specify a calendar date or time and are excluded from ICS.'}, ensure_ascii=False, indent=2) + '\n')
     write(output / 'signals.json', json.dumps({'generated_at': now.isoformat(), 'signals': signals, 'new_arrivals': new_arrivals, 'note': 'First sightings are separate from repeat-observation signals. Not a forecast probability.'}, ensure_ascii=False, indent=2) + '\n')
     create_subscription_feeds(output, rows, upcoming, now, site_url)
     write(output / 'week' / 'index.html', page_html(week_page(upcoming, now, site_url, indexing_enabled)))
@@ -722,8 +742,8 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(
             f'<url><loc>{xml_escape(site_url + p)}</loc></url>\n' for p in paths) + '</urlset>\n'
         write(output / 'sitemap.xml', sitemap)
-    write(output / 'build-meta.json', json.dumps({'built_at': now.isoformat(), 'observed_cards': len(rows), 'signals_count': len(signals), 'new_arrivals_count': len(new_arrivals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'canonical_configured': bool(site_url), 'indexing_enabled': indexing_enabled, 'collection_status': health}, ensure_ascii=False, indent=2) + '\n')
-    return {'observed_cards': len(rows), 'signals_count': len(signals), 'new_arrivals_count': len(new_arrivals), 'upcoming_cards': len(upcoming), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'output': str(output), 'canonical_configured': bool(site_url), 'collection': health}
+    write(output / 'build-meta.json', json.dumps({'built_at': now.isoformat(), 'observed_cards': len(rows), 'signals_count': len(signals), 'new_arrivals_count': len(new_arrivals), 'upcoming_cards': len(upcoming), 'announced_month_only': len(announcements), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'canonical_configured': bool(site_url), 'indexing_enabled': indexing_enabled, 'collection_status': health}, ensure_ascii=False, indent=2) + '\n')
+    return {'observed_cards': len(rows), 'signals_count': len(signals), 'new_arrivals_count': len(new_arrivals), 'upcoming_cards': len(upcoming), 'announced_month_only': len(announcements), 'detail_pages': min(MAX_DETAIL_PAGES, len(rows)), 'output': str(output), 'canonical_configured': bool(site_url), 'collection': health}
 
 
 def main():
