@@ -10,6 +10,7 @@ from event_discovery import (
     extract_game_title_date,
     extract_jra_g1_dates,
     extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
+    extract_k_arena_dates, extract_zepp_schedule,
 )
 
 NOW = datetime(2026, 11, 16, 8, tzinfo=timezone(timedelta(hours=9)))
@@ -225,6 +226,38 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(found[2]["starts_at"], "2026-12-26")
         self.assertTrue(all(x["event_type"] == "horse_race" for x in found))
         self.assertTrue(all("verified_at" not in x for x in found))
+
+    def test_k_arena_date_and_start_time_not_invented(self):
+        src = {"id": "k_arena", "url": "https://k-arena.com/schedule/",
+               "category": "音楽・ライブ", "kind": "k_arena_dates"}
+        html = """<ul><li>2026.11.24.Tue. 取扱公演
+        IRON MAIDEN RUN FOR YOUR LIVES WORLD TOUR 2026
+        OPEN 17:30 / START 19:00</li>
+        <li>2026.11.25.Wed. IRON MAIDEN LIVE
+        OPEN 17:30 / START 19:00</li>
+        <li>2026.11.14.Sat. 過去の公演 START 20:00</li></ul>"""
+        rows = extract_k_arena_dates(html, src, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["starts_at"], "2026-11-24")
+        self.assertNotIn("19:00", rows[0]["title"])
+        self.assertEqual(rows[0]["event_type"], "concert")
+        self.assertNotIn("verified_at", rows[0])
+
+    def test_zepp_official_listing_takes_date_not_door_open(self):
+        src = {"id": "zepp_shinjuku",
+               "url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+               "category": "音楽・ライブ", "kind": "zepp_schedule"}
+        html = """<main>2026 11.17 TUE 出演者多数 sound stock Vol.22
+        [OPEN] 14:00 [START] 14:30 [PRICE] 4500 READ MORE
+        2026 11.18 WED WAAARZ Road to Zepp Shinjuku TOUR FINAL
+        [OPEN] 17:30 [START] 18:30 [PRICE] 12000 READ MORE
+        2026 11.15 SUN 昨日のコンサート [OPEN] 17:30</main>"""
+        rows = extract_zepp_schedule(html, src, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["starts_at"], "2026-11-17")
+        self.assertEqual(rows[1]["starts_at"], "2026-11-18")
+        self.assertEqual(rows[0]["event_type"], "concert")
+        self.assertNotIn("verified_at", rows[0])
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
