@@ -29,13 +29,22 @@ MAX_RESPONSE_BYTES = 500_000
 CATEGORIES = {"配信・YouTuber", "ゲーム", "音楽・ライブ", "映画・アニメ"}
 
 
+
+class RejectCrossHostRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        # The URL contains a secret API key. Do not forward it to any host.
+        raise RuntimeError("youtube_api_redirect_blocked")
+
+
+
 def _api_get(url):
     """Bound API response size. Never include an API key in errors or logs."""
     request = urllib.request.Request(
         url, headers={"Accept": "application/json", "User-Agent": "TrendAheadScheduleResearch/1.0"}
     )
     try:
-        with urllib.request.urlopen(request, timeout=12) as response:
+        opener = urllib.request.build_opener(RejectCrossHostRedirect)
+        with opener.open(request, timeout=12) as response:
             if not response.geturl().startswith(API_BASE):
                 raise ValueError("unexpected API redirect")
             raw = response.read(MAX_RESPONSE_BYTES + 1)
