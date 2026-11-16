@@ -54,6 +54,17 @@ class MonthOnlyAnnouncementsTest(unittest.TestCase):
             with self.subTest(row=row):
                 self.assertEqual(self.load([row]), [])
 
+    def test_editorial_monitor_can_inspect_hidden_stale_window(self):
+        with tempfile.TemporaryDirectory() as temp:
+            file = Path(temp) / "announced.json"
+            stale = dict(self.sample(),
+                         verified_at=(NOW - timedelta(days=35)).isoformat())
+            file.write_text(json.dumps([stale], ensure_ascii=False), encoding="utf-8")
+            self.assertEqual(load_announced_windows(file, NOW), [])
+            reviewed = load_announced_windows(file, NOW, include_stale=True)
+            self.assertEqual(len(reviewed), 1)
+            self.assertEqual(reviewed[0]["period"], "2027-01")
+
     def test_past_and_too_far_windows_excluded(self):
         self.assertEqual(self.load([dict(self.sample(), period="2026-10")]), [])
         self.assertEqual(self.load([dict(self.sample(), period="2027-12")]), [])
