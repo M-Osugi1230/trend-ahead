@@ -24,6 +24,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "WAAARZ TOUR FINAL Zepp Shinjuku",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-18T18:30:00+09:00",
+    "description": "Zepp Shinjuku。WAAARZ Road to Zepp Shinjuku『雷轟』TOUR FINAL。公式開演18:30。",
+    "official_url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
     "title": "YOGEE NEW WAVES『Dreamin’ Night 8』",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-18T19:00:00+09:00",
@@ -208,6 +216,22 @@
     "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
+    "title": "Hearts2Hearts JAPAN 1st Fan Event DAY1",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-22T18:00:00+09:00",
+    "description": "Kアリーナ横浜。公式予定は開場17:00・開演18:00。公演・チケット詳細は主催者公式で確認。",
+    "official_url": "https://k-arena.com/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
+    "title": "FINLANDS『娯楽'26』Zepp Shinjuku",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-22T18:00:00+09:00",
+    "description": "Zepp Shinjuku。公式公演スケジュール記載の開演18:00。",
+    "official_url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
     "title": "DUSTCELL LIVE 2026 ぴあアリーナMM公演",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-23",
@@ -240,12 +264,36 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "Hearts2Hearts JAPAN 1st Fan Event DAY2",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-23T16:00:00+09:00",
+    "description": "Kアリーナ横浜。公式予定は開場15:00・開演16:00。公演・チケット詳細は主催者公式で確認。",
+    "official_url": "https://k-arena.com/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
     "title": "LIL LEAGUE's place『ATELIER』2026",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-24T18:00:00+09:00",
     "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
     "description": "Zepp DiverCityで開催予定。",
     "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "IRON MAIDEN RUN FOR YOUR LIVES TOUR Kアリーナ DAY1",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-24T19:00:00+09:00",
+    "description": "Kアリーナ横浜。公式予定は開場17:30・開演19:00。チケット状況は主催者公式で確認。",
+    "official_url": "https://k-arena.com/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
+    "title": "TENDOUJI TOUR 2026 FINAL Zepp Shinjuku",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-24T19:00:00+09:00",
+    "description": "Zepp Shinjuku。TENDOUJI LIVEHOUSE TOUR 2026 FINAL。開演19:00、ゲスト出演あり。",
+    "official_url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
   },
   {
     "title": "Juice=Juice Room Tour 2026 ぴあアリーナMM公演",
@@ -256,12 +304,28 @@
     "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
+    "title": "IRON MAIDEN RUN FOR YOUR LIVES TOUR Kアリーナ DAY2",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-25T19:00:00+09:00",
+    "description": "Kアリーナ横浜。公式予定は開場17:30・開演19:00。チケット状況は主催者公式で確認。",
+    "official_url": "https://k-arena.com/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
     "title": "『Destruction AllStars』オンラインサービス終了",
     "category": "ゲーム",
     "description": "PlayStation公式告知。利用者向けサービス終了時刻。",
     "starts_at": "2026-11-26T00:00:00+09:00",
     "official_url": "https://www.playstation.com/ja-jp/support/important-notice/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "SUGIZO TOUR 2026 Zepp Shinjuku",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-26T18:30:00+09:00",
+    "description": "Zepp Shinjuku。SUGIZO TOUR 2026 THE ASCENSION TO THE NEXT ERA。公式開演18:30。",
+    "official_url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
   },
   {
     "title": "TAHITI80 LIVE IN TOKYO",
@@ -294,6 +358,14 @@
     "starts_at": "2026-11-27",
     "official_url": "https://www.warnerbros.co.jp/movie/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "ポルカドットスティングレイ STILL PINK TOUR Zepp Shinjuku",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-27T18:30:00+09:00",
+    "description": "Zepp Shinjuku。STILL PINK TOUR 2026。公式開演18:30。",
+    "official_url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
   },
   {
     "title": "ロックアンセム EX 2026 DAY1",
@@ -336,6 +408,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "アイドルマスター シンデレラガールズ 15周年公演 DAY1",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-28T17:00:00+09:00",
+    "description": "Kアリーナ横浜。THE IDOLM@STER CINDERELLA GIRLS 15th ANNIVERSARY PARTY。開演17:00。",
+    "official_url": "https://k-arena.com/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
+  },
+  {
     "title": "宇都宮隆 LIVE UTSU BAR TOUR 2026",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-28T18:00:00+09:00",
@@ -366,6 +446,14 @@
     "starts_at": "2026-11-29T17:00:00+09:00",
     "official_url": "https://rock-anthem.jp/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "アイドルマスター シンデレラガールズ 15周年公演 DAY2",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-29T17:00:00+09:00",
+    "description": "Kアリーナ横浜。THE IDOLM@STER CINDERELLA GIRLS 15th ANNIVERSARY PARTY。開演17:00。",
+    "official_url": "https://k-arena.com/schedule/",
+    "verified_at": "2026-11-16T16:23:00+09:00"
   },
   {
     "title": "AWS re:Invent 2026 開幕",
