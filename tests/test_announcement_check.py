@@ -8,6 +8,7 @@ NOW = datetime(2026, 11, 17, 1, 0, tzinfo=timezone(timedelta(hours=9)))
 ITEMS = [{
     "title": "アオハル・ワンスモア", "period": "2027-01",
     "official_url": "https://www.tv-tokyo.co.jp/anime/aoharuoncemore/",
+    "verified_at": (NOW - timedelta(days=2)).isoformat(),
 }]
 
 
@@ -44,6 +45,17 @@ class MonthCheckTest(unittest.TestCase):
             self.assertEqual(result["review_required"], 1)
             self.assertEqual(result["status"], "review_required")
             self.assertNotIn("cancelled", str(result))
+
+    def test_old_editorial_check_is_never_silently_trusted(self):
+        old = dict(ITEMS[0],
+                   verified_at=(NOW - timedelta(days=35)).isoformat())
+        result = check([old], NOW, lambda url: "<p>2027年1月放送予定</p>")
+        self.assertEqual(result["status"], "review_required")
+        self.assertEqual(result["review_required"], 1)
+        self.assertEqual(result["items"][0]["status"],
+                         "editor_verification_older_than_30_days")
+        self.assertTrue(result["items"][0]["verification_stale"])
+        self.assertEqual(result["items"][0]["observed_months"], ["2027-01"])
 
     def test_missing_catalog_means_zero_checks(self):
         result = check([], NOW, lambda _: (_ for _ in ()).throw(AssertionError("no network")))
