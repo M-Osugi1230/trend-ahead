@@ -47,5 +47,21 @@
     "season_year": 2026,
     "max_candidates": 20,
     "description": "JRA公式GⅠ日程。開始時刻は別途確認、審査前候補のみ"
+  },
+  {
+    "id": "k_arena",
+    "url": "https://k-arena.com/schedule/",
+    "category": "音楽・ライブ",
+    "kind": "k_arena_dates",
+    "max_candidates": 35,
+    "description": "Kアリーナ横浜公式公演予定。開場時刻と開演時刻は別項目"
+  },
+  {
+    "id": "zepp_shinjuku",
+    "url": "https://www.zepp.co.jp/hall/shinjuku/schedule/",
+    "category": "音楽・ライブ",
+    "kind": "zepp_schedule",
+    "max_candidates": 35,
+    "description": "Zepp Shinjuku公式公演日程。チケット購入条件は個別に審査"
   }
 ]
