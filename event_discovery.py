@@ -790,6 +790,9 @@ def _jfa_schedule_records(html, source, now):
     """Parse exact official match rows; keep excluded fixtures for audit."""
     if source.get("category") != "スポーツ":
         return [], []
+    team_name = source.get("team_name", "サッカー日本代表")
+    if team_name not in ("サッカー日本代表", "なでしこジャパン"):
+        return [], []
     table = TableRowTextExtractor()
     table.feed(html)
     today = now.astimezone(JST).date()
@@ -811,6 +814,7 @@ def _jfa_schedule_records(html, source, now):
         if JFA_NOT_PLAYING.search(" ".join((competition, score, opponent))):
             exclusions.append({
                 "source_id": source["id"], "official_url": source["url"],
+                "team_name": team_name,
                 "starts_at": played_on.isoformat(), "competition": competition,
                 "opponent": opponent, "status": "official_cancel_or_postpone_review",
                 "reason": "JFAの中止・延期表記。自動公開も既存掲載の自動削除もしない",
@@ -819,14 +823,15 @@ def _jfa_schedule_records(html, source, now):
         if score not in JFA_NO_RESULT:
             continue  # A final/result row is not an upcoming fixture.
         if opponent in JFA_UNDECIDED:
-            title = f"サッカー日本代表 対戦相手未定｜{competition}"
+            title = f"{team_name} 対戦相手未定｜{competition}"
         else:
             clean_opponent = re.sub(r"代表$", "", opponent).strip()
-            title = f"サッカー日本代表 vs {clean_opponent}｜{competition}"
+            title = f"{team_name} vs {clean_opponent}｜{competition}"
         candidate = candidate_from_heading(title[:150], played_on.isoformat(), source, now)
         if candidate is None:
             continue
         candidate["event_type"] = "national_team_match"
+        candidate["team_name"] = team_name
         candidate["opponent"] = opponent
         candidate["venue_hint"] = venue[:140]
         candidate["date_claim"] = "jfa_schedule_date_only_jst"
@@ -856,17 +861,26 @@ def extract_jfa_schedule_exclusions(html: str, source: dict, now: datetime):
     return _jfa_schedule_records(html, source, now)[1]
 
 
-def _jfa_opponent_from_title(title: str) -> str | None:
+def _jfa_identity_from_title(title: str) -> tuple[str | None, str | None]:
+    """Return (national team, opponent), never conflating men's and women's matches."""
     if not isinstance(title, str):
-        return None
+        return None, None
     match = re.search(
-        r"(?:サッカー)?日本代表\s*(?:vs\.?|対)\s*"
-        r"(?P<opponent>[^\s｜|（(]+)", title, re.IGNORECASE
+        r"(?P<team>サッカー日本代表|日本代表|なでしこジャパン)\s*"
+        r"(?:vs\\.?|対)\s*(?P<opponent>[^\s｜|（(]+)",
+        title, re.IGNORECASE
     )
-    if not match:
-        return None
-    value = normalize(match["opponent"])
-    return re.sub(r"代表$", "", value) or None
+    if match:
+        team = ("なでしこジャパン" if match["team"] == "なでしこジャパン"
+                else "サッカー日本代表")
+        opponent = re.sub(r"代表$", "", normalize(match["opponent"]))
+        return team, opponent or None
+    if "なでしこジャパン" in title:
+        return "なでしこジャパン", None
+    if "日本代表" in title:
+        return "サッカー日本代表", None
+    return None, None
+
 
 def match_curated(candidate: dict, curated: list):
     """Same-day duplicate checks: preserve uncertainty for renamed releases."""
@@ -886,15 +900,17 @@ def match_curated(candidate: dict, curated: list):
             return "exact_curated"
         if (candidate.get("event_type") == "national_team_match"
                 and row.get("category") == "スポーツ"):
-            challenger = _jfa_opponent_from_title(candidate["title"])
-            existing = _jfa_opponent_from_title(str(row.get("title", "")))
-            if challenger and existing and challenger == existing:
-                return "exact_curated"
-            # The same official fixture may have changed from TBD to named
-            # opposition; never silently re-register the replacement.
-            if ("日本代表" in str(row.get("title", ""))
-                    and (challenger is None or existing is None)):
-                return "possible_curated"
+            challenger_team, challenger_opponent = _jfa_identity_from_title(
+                candidate["title"]
+            )
+            existing_team, existing_opponent = _jfa_identity_from_title(
+                str(row.get("title", ""))
+            )
+            if challenger_team and challenger_team == existing_team:
+                if challenger_opponent and challenger_opponent == existing_opponent:
+                    return "exact_curated"
+                if not challenger_opponent or not existing_opponent:
+                    return "possible_curated"
         if (candidate_is_movie and row.get("category") == "映画・アニメ"
                 and len(film_key) >= 3 and film_key == _movie_title_key(row.get("title", ""))):
             return "exact_curated"
