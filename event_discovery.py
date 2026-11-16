@@ -657,6 +657,51 @@ def extract_pokemon_goods_json(raw: str, source: dict, now: datetime):
     return items
 
 
+
+TCG_PRODUCT_TYPES = (
+    "ブースターパック", "プレミアムブースター",
+    "トライアルデッキ", "エクストラブースター",
+)
+TCG_PRODUCT_ENTRY = re.compile(
+    r"(?P<title>(?:ブースターパック|プレミアムブースター|トライアルデッキ|"
+    r"エクストラブースター)\s+.{3,105}?)"
+    r"\s*発売日\s*[:：]?\s*(?P<released>20\d{2}年\s*\d{1,2}月\s*\d{1,2}日)",
+)
+
+
+def extract_tcg_product_list(html: str, source: dict, now: datetime):
+    """Staged product launches from a first-party trading card catalog.
+
+    Requires an explicit 発売日 next to the title, not a news posting timestamp.
+    Avoids copying product descriptions or prices.
+    """
+    parser = ListItemExtractor()
+    parser.feed(html)
+    candidates = list(parser.items)
+    # If the site uses non-list cards, allow a bounded textual fallback.
+    if not candidates:
+        visible = HeadingTextExtractor()
+        visible.feed(html)
+        candidates = [" ".join(value for _, value in visible.blocks)]
+    found, seen = [], set()
+    for row in candidates:
+        for match in TCG_PRODUCT_ENTRY.finditer(row):
+            title = re.sub(r"\s+", " ", match["title"]).strip()
+            if not any(title.startswith(t) for t in TCG_PRODUCT_TYPES):
+                continue
+            candidate = candidate_from_heading(title+" 発売", match["released"], source, now)
+            if candidate and candidate["candidate_id"] not in seen:
+                candidate["event_type"] = "tcg_release"
+                candidate["notes"] = "公式商品一覧の発売日候補。商品個別URL、販売変更・在庫は手動審査"
+                found.append(candidate)
+                seen.add(candidate["candidate_id"])
+            if len(found) >= source.get("max_candidates", 25):
+                break
+        if len(found) >= source.get("max_candidates", 25):
+            break
+    return found
+
+
 def match_curated(candidate: dict, curated: list):
     match_title = normalize(candidate["title"])
     candidate_is_movie = candidate.get("event_type") == "movie_release"
@@ -687,7 +732,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json", "tcg_product_list")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
@@ -705,6 +750,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 "k_arena_dates": extract_k_arena_dates,
                 "zepp_schedule": extract_zepp_schedule,
                 "pokemon_goods_json": extract_pokemon_goods_json,
+                "tcg_product_list": extract_tcg_product_list,
             }[source["kind"]]
             rows = extractor(html, source, now)
             added = 0
