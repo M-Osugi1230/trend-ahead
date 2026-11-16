@@ -751,6 +751,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
     if now.tzinfo is None:
         raise ValueError("now must be timezone-aware")
     candidates = []
+    observations = []
     results = []
     seen = set()
     for source in sources[:MAX_SOURCES]:
@@ -784,6 +785,16 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 if item["candidate_id"] in seen:
                     continue
                 seen.add(item["candidate_id"])
+                # Persist source sightings even when the item is already public.
+                # Review candidates alone omit exact matches and cannot be used
+                # to detect an official listing that disappeared or moved.
+                observations.append({
+                    "candidate_id": item["candidate_id"],
+                    "source_id": item["source_id"],
+                    "title": item["title"],
+                    "starts_at": item["starts_at"],
+                    "event_type": item.get("event_type", "unknown"),
+                })
                 item["match_curated"] = match_curated(item, curated)
                 if item["match_curated"] == "exact_curated":
                     continue
@@ -798,6 +809,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
             results.append({"source_id": source_id, "status": "fetch_or_parse_error",
                             "reason": str(error)[:180]})
     candidates.sort(key=lambda c: (c["starts_at"], c["source_id"], c["title"]))
+    observations.sort(key=lambda c: (c["source_id"], c["starts_at"], c["title"]))
     ok = sum(item["status"] == "ok" for item in results)
     return {
         "generated_at": now.isoformat(),
@@ -805,6 +817,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         "sources_total": len(results), "sources_ok": ok,
         "queued": len(candidates),
         "candidates": candidates,
+        "observed": observations,
         "sources": results,
         "publication": "manual_editorial_review_only",
     }
