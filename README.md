@@ -1,4 +1,4 @@
-# Trend Ahead — Public MVP v0.8 (2026-11-16)
+# Trend Ahead — Public MVP v0.9 (2026-11-16)
 
 **明日の話題を、今日知る。**
 
@@ -58,6 +58,18 @@
 - 初回監査：**掲載計33件、7日以内8件、30日以内30件、公式リンクや日時形式のエラー0件**。12ジャンルのうち7ジャンルは将来予定が未登録なので、追加調査が必要
 - GitHub Actionsで**Python58件＋JavaScript操作テスト**、デプロイ後HTTP疎通に成功
 - ただし**長期継続運用、実利用者への配信、SNSへの外部投稿、ユーザー獲得実績は未検証**。正式SEO公開の`noindex`安全設定も維持
+
+## v0.9：公式イベントの自動発見→審査キュー→明示承認
+
+- [公式イベント情報源](data/event_sources.json)に東京ビッグサイト・幕張メッセの一次情報を登録し、`event_discovery.py`で開催日とタイトルの候補を抽出
+- 2/2の情報源の取得に成功。初回の**未審査候補25件**を抽出（[審査トレイ Issue #5](https://github.com/M-Osugi1230/trend-ahead/issues/5)）
+- すべての候補は`needs_review`。**審査なしの自動公開、確認時刻の自動書換、架空の開始時間は行わない**
+- [毎朝のGitHub Actions](https://github.com/M-Osugi1230/trend-ahead/actions/workflows/research-outreach.yml)が`event-candidates.json`と`event-review.md`をArtifactに保存
+- `review_apply.py`は**dry-runが既定**。候補ID、公式ページ、日時、編集者、確認日時、重複の妥当性を検証し、明示的な`--apply`がある場合だけ公開元データを編集
+- 一次情報を実際に再確認した**ファン向け予定9件**を追加し、公式確認済みの予定を**33→42件**に拡充。ジャンプフェスタ応募締切、ポケモンカード大会の配信、音楽イベント、公式リセール開始など
+- 日付だけ確認できる発売・公開情報も、`outreach.py`の発信原稿で架空の`00:00`と書かないように修正
+- [編集・公開の詳しい手順](EDITORIAL.md)参照。外部SNSへの自動投稿は行っていない
+- [GitHub Actionsの回帰テスト](https://github.com/M-Osugi1230/trend-ahead/actions/runs/43777667553)はPython73件＋JavaScript操作テストに合格
 
 ## できること
 
