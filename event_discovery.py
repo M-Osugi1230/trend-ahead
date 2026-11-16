@@ -867,7 +867,7 @@ def _jfa_identity_from_title(title: str) -> tuple[str | None, str | None]:
         return None, None
     match = re.search(
         r"(?P<team>サッカー日本代表|日本代表|なでしこジャパン)\s*"
-        r"(?:vs\\.?|対)\s*(?P<opponent>[^\s｜|（(]+)",
+        r"(?:vs[.]?|対)\s*(?P<opponent>[^\s｜|（(]+)",
         title, re.IGNORECASE
     )
     if match:
