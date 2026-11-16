@@ -154,7 +154,8 @@ def build_report(data_dir: Path, reference: Path, now: datetime | None = None) -
             "approx_lower_bound_delta": last_value - first_value,
             "result": outcome,
             "result_label": LABELS[outcome],
-            "forecast_was_issued": False,
+            # Prior impressions/notifications are not logged: do not claim none existed.
+            "forecast_issuance_status": "unverified",
         })
     counts = Counter(c["result"] for c in episodes)
     positives = sorted((e for e in episodes if e["result"] == "growth_observed"),
