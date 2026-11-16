@@ -31,7 +31,7 @@ def _valid_url(value):
         return False
 
 
-def load_announced_windows(path: Path, now: datetime, max_count=12):
+def load_announced_windows(path: Path, now: datetime, max_count=12, *, include_stale=False):
     if now.tzinfo is None:
         raise ValueError("now requires a timezone")
     if not path.exists():
@@ -62,8 +62,9 @@ def load_announced_windows(path: Path, now: datetime, max_count=12):
             continue
         try:
             verified = datetime.fromisoformat(row.get("verified_at"))
-            if (verified.tzinfo is None or verified > now
-                    or (now - verified).total_seconds() > 30 * 86400):
+            if verified.tzinfo is None or verified > now:
+                continue
+            if not include_stale and (now - verified).total_seconds() > 30 * 86400:
                 continue
             year, month = map(int, period.split("-"))
         except (ValueError, TypeError):
