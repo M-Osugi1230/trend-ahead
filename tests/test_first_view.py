@@ -48,6 +48,7 @@ class FutureFirstViewTest(unittest.TestCase):
             self.assertIn('data-starts-at="', html)
             self.assertIn('data-search="', html)
             self.assertIn('id="future-result-status"', html)
+            self.assertIn('id="future-load-more"', html)
             self.assertIn('href="/trend-ahead/week/"', html)
             self.assertNotIn('<section class="hero">', html)
             self.assertIn('noindex,follow', html)
@@ -65,8 +66,8 @@ class FutureFirstViewTest(unittest.TestCase):
     def test_frontend_includes_all_filter_wiring_and_no_telemetry(self):
         script = (Path(__file__).resolve().parents[1] / "web/assets/app.js").read_text(encoding="utf-8")
         self.assertIn("function filterFuture()", script)
-        self.assertIn("futureSearch?.addEventListener('input', filterFuture)", script)
-        self.assertIn("futureCategory?.addEventListener('change', filterFuture)", script)
+        self.assertIn("futureSearch?.addEventListener('input', () => {", script)
+        self.assertIn("futureCategory?.addEventListener('change', () => {", script)
         self.assertIn("option.setAttribute('aria-pressed', String(active))", script)
         self.assertIn("card.hidden = !show", script)
         self.assertNotIn("fetch('/tracking", script)
