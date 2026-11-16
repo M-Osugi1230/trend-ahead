@@ -14,5 +14,29 @@
     "kind": "date_then_title",
     "max_candidates": 30,
     "description": "幕張メッセ公式イベントカレンダー。主催者都合の予定変更に注意"
+  },
+  {
+    "id": "toho_movies",
+    "url": "https://www.toho.co.jp/movie/lineup/",
+    "category": "映画・アニメ",
+    "kind": "movie_title_date",
+    "max_candidates": 30,
+    "description": "東宝公式の上映予定作品。開始時刻ではなく公開日のみ"
+  },
+  {
+    "id": "warner_movies",
+    "url": "https://www.warnerbros.co.jp/movie/",
+    "category": "映画・アニメ",
+    "kind": "movie_date_title",
+    "max_candidates": 20,
+    "description": "ワーナー・ブラザース公式の近日公開作品"
+  },
+  {
+    "id": "pia_arena",
+    "url": "https://pia-arena-mm.jp/event/index.html",
+    "category": "音楽・ライブ",
+    "kind": "arena_month_day",
+    "max_candidates": 40,
+    "description": "ぴあアリーナMM公式の開催予定。公演時刻や入場可否は個別に確認"
   }
 ]
