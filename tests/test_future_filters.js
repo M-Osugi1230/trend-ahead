@@ -65,6 +65,7 @@ const document = {
   }
 };
 const app = fs.readFileSync(path.resolve(__dirname, '../web/assets/app.js'), 'utf8');
+function startApp() {
 vm.runInNewContext(app, {
   document,
   location: { hash: '' },
@@ -76,6 +77,8 @@ vm.runInNewContext(app, {
   URL,
   console
 }, { timeout: 1500 });
+}
+startApp();
 
 assert.deepEqual(cards.map(c => c.hidden), [false, false, false]);
 assert.match(count.textContent, /^3件/);
@@ -103,6 +106,8 @@ search.listeners.input();
 assert.deepEqual(cards.map(c => c.hidden), [false, false, false]);
 // Once the catalog expands, only 12 items should appear until explicitly requested.
 for (let i = 0; i < 25; i++) cards.push(makeCard(i + 1, 'ゲーム', '追加イベント'));
+// A real page captures its cards on startup, before event handlers run.
+startApp();
 search.value = '';
 category.value = 'all';
 buttons.all.listeners.click();
