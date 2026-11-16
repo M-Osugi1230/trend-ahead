@@ -8,6 +8,7 @@ from event_discovery import (
     allowed_https_url, candidate_from_heading, discover, extract_heading_dates,
     match_curated, normalize, review_markdown, extract_date_title_rows,
     extract_game_title_date,
+    extract_jra_g1_dates,
     extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
 )
 
@@ -202,6 +203,28 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(rows[0]["event_type"], "game_release")
         self.assertTrue(all(row["status"] == "needs_review" for row in rows))
         self.assertTrue(all("verified_at" not in row for row in rows))
+
+    def test_jra_grade_one_rows_only_and_date_precision(self):
+        source = {
+            "id": "jra_g1",
+            "url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+            "kind": "jra_g1_table", "category": "スポーツ",
+            "season_year": 2026, "max_candidates": 20,
+        }
+        html = """<table>
+        <tr><th>11月22日日曜</th><td>GⅠマイルチャンピオンシップ</td><td>京都</td></tr>
+        <tr><th>12月20日日曜</th><td>GⅠ朝日杯フューチュリティS</td><td>阪神</td></tr>
+        <tr><th>12月26日土曜</th><td>J・GⅠ中山大障害</td><td>中山</td></tr>
+        <tr><th>12月27日日曜</th><td>GⅡ例外レース</td><td>東京</td></tr>
+        <tr><th>12月28日月曜</th><td>GⅢ対象外</td><td>東京</td></tr>
+        </table>"""
+        found = extract_jra_g1_dates(html, source, NOW)
+        self.assertEqual(len(found), 3)
+        self.assertEqual(found[0]["starts_at"], "2026-11-22")
+        self.assertEqual(found[1]["starts_at"], "2026-12-20")
+        self.assertEqual(found[2]["starts_at"], "2026-12-26")
+        self.assertTrue(all(x["event_type"] == "horse_race" for x in found))
+        self.assertTrue(all("verified_at" not in x for x in found))
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
