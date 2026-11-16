@@ -758,6 +758,116 @@ def extract_yugioh_products(html: str, source: dict, now: datetime):
     return found
 
 
+
+# The JFA official men's national-team schedule has a table with columns:
+# 開催日 | 試合名 | スコア | 対戦チーム | 会場 | 公式記録.
+# Its rows may use either "11/17(火)" or "2027/1/11(月)" dates.
+JFA_MATCH_DATE = re.compile(
+    r"^(?:(?P<year>20\d{2})/)?(?P<month>0?[1-9]|1[0-2])/"
+    r"(?P<day>0?[1-9]|[12]\d|3[01])\s*[（(][^）)]{1,5}[）)]$"
+)
+JFA_NOT_PLAYING = re.compile(r"中止|延期|中断|開催取りやめ|不開催")
+JFA_UNDECIDED = {"未定", "調整中", "TBD", "-", "－", "―"}
+JFA_NO_RESULT = {"", "-", "－", "―", "未定"}
+
+
+def _jfa_date(row, source):
+    year = source.get("season_year")
+    if type(year) is not int or not 2020 <= year <= 2100:
+        return None
+    if not isinstance(row, list) or len(row) < 5:
+        return None
+    match = JFA_MATCH_DATE.fullmatch(row[0].strip())
+    if not match:
+        return None  # Multi-day tournament windows are NOT single kickoffs.
+    try:
+        return date(int(match["year"] or year), int(match["month"]), int(match["day"]))
+    except ValueError:
+        return None
+
+
+def _jfa_schedule_records(html, source, now):
+    """Parse exact official match rows; keep excluded fixtures for audit."""
+    if source.get("category") != "スポーツ":
+        return [], []
+    table = TableRowTextExtractor()
+    table.feed(html)
+    today = now.astimezone(JST).date()
+    accepted, exclusions, seen = [], [], set()
+    for cells in table.rows:
+        played_on = _jfa_date(cells, source)
+        if played_on is None or not today <= played_on <= today + timedelta(days=90):
+            continue
+        competition = re.sub(r"\s+", " ", cells[1]).strip()
+        score = re.sub(r"\s+", " ", cells[2]).strip()
+        opponent = re.sub(r"\s+", " ", cells[3]).strip()
+        venue = re.sub(r"\s+", " ", cells[4]).strip()
+        if not 5 <= len(competition) <= 130 or not 1 <= len(opponent) <= 70:
+            continue
+        identity = (played_on.isoformat(), normalize(competition), normalize(opponent))
+        if identity in seen:
+            continue
+        seen.add(identity)
+        if JFA_NOT_PLAYING.search(" ".join((competition, score, opponent))):
+            exclusions.append({
+                "source_id": source["id"], "official_url": source["url"],
+                "starts_at": played_on.isoformat(), "competition": competition,
+                "opponent": opponent, "status": "official_cancel_or_postpone_review",
+                "reason": "JFAの中止・延期表記。自動公開も既存掲載の自動削除もしない",
+            })
+            continue
+        if score not in JFA_NO_RESULT:
+            continue  # A final/result row is not an upcoming fixture.
+        if opponent in JFA_UNDECIDED:
+            title = f"サッカー日本代表 対戦相手未定｜{competition}"
+        else:
+            clean_opponent = re.sub(r"代表$", "", opponent).strip()
+            title = f"サッカー日本代表 vs {clean_opponent}｜{competition}"
+        candidate = candidate_from_heading(title[:150], played_on.isoformat(), source, now)
+        if candidate is None:
+            continue
+        candidate["event_type"] = "national_team_match"
+        candidate["opponent"] = opponent
+        candidate["venue_hint"] = venue[:140]
+        candidate["date_claim"] = "jfa_schedule_date_only_jst"
+        candidate["notes"] = (
+            "JFA公式試合日程。日付は日本時間。開始時刻・放送・変更は"
+            "JFAの個別試合ページを人が確認。対戦相手未定は推測しない"
+        )
+        candidate["evidence"] = f"JFA日程表：{cells[0]}／対戦：{opponent}／結果未掲載"
+        accepted.append(candidate)
+        if len(accepted) >= source.get("max_candidates", 25):
+            break
+    return accepted, exclusions
+
+
+
+
+def _jfa_header_cells(html: str):
+    parser = TableRowTextExtractor()
+    parser.feed(html)
+    return parser.rows
+
+def extract_jfa_schedule_table(html: str, source: dict, now: datetime):
+    return _jfa_schedule_records(html, source, now)[0]
+
+
+def extract_jfa_schedule_exclusions(html: str, source: dict, now: datetime):
+    return _jfa_schedule_records(html, source, now)[1]
+
+
+def _jfa_opponent_from_title(title: str) -> str | None:
+    if not isinstance(title, str):
+        return None
+    match = re.search(
+        r"(?:サッカー)?日本代表\s*(?:vs\.?|対)\s*"
+        r"(?P<opponent>[^\s｜|（(]+)", title, re.IGNORECASE
+    )
+    if not match:
+        return None
+    value = normalize(match["opponent"])
+    return re.sub(r"代表$", "", value) or None
+
 def match_curated(candidate: dict, curated: list):
     """Same-day duplicate checks: preserve uncertainty for renamed releases."""
     match_title = normalize(candidate["title"])
@@ -774,6 +884,17 @@ def match_curated(candidate: dict, curated: list):
             continue
         if match_title == official_title:
             return "exact_curated"
+        if (candidate.get("event_type") == "national_team_match"
+                and row.get("category") == "スポーツ"):
+            challenger = _jfa_opponent_from_title(candidate["title"])
+            existing = _jfa_opponent_from_title(str(row.get("title", "")))
+            if challenger and existing and challenger == existing:
+                return "exact_curated"
+            # The same official fixture may have changed from TBD to named
+            # opposition; never silently re-register the replacement.
+            if ("日本代表" in str(row.get("title", ""))
+                    and (challenger is None or existing is None)):
+                return "possible_curated"
         if (candidate_is_movie and row.get("category") == "映画・アニメ"
                 and len(film_key) >= 3 and film_key == _movie_title_key(row.get("title", ""))):
             return "exact_curated"
@@ -795,13 +916,14 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
     candidates = []
     observations = []
     results = []
+    official_exclusions = []
     seen = set()
     for source in sources[:MAX_SOURCES]:
         source_id = str(source.get("id", "invalid"))
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json", "tcg_product_list", "yugioh_products")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json", "tcg_product_list", "yugioh_products", "jfa_schedule_table")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
@@ -821,8 +943,11 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 "pokemon_goods_json": extract_pokemon_goods_json,
                 "tcg_product_list": extract_tcg_product_list,
                 "yugioh_products": extract_yugioh_products,
+                "jfa_schedule_table": extract_jfa_schedule_table,
             }[source["kind"]]
             rows = extractor(html, source, now)
+            if source["kind"] == "jfa_schedule_table":
+                official_exclusions.extend(extract_jfa_schedule_exclusions(html, source, now))
             added = 0
             for item in rows:
                 if item["candidate_id"] in seen:
@@ -845,7 +970,14 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 added += 1
             # A successful HTTP request with zero parsed dates is NOT a
             # successful content source. Surface the mismatch for review.
-            status = "ok" if rows else "no_parseable_items"
+            if rows:
+                status = "ok"
+            elif (source["kind"] == "jfa_schedule_table"
+                  and any("開催日" in cells and "対戦チーム" in cells
+                          for cells in _jfa_header_cells(html))):
+                status = "ok_no_upcoming_in_horizon"
+            else:
+                status = "no_parseable_items"
             results.append({"source_id": source_id, "status": status,
                             "extracted": len(rows), "queued": added})
         except (ValueError, OSError, urllib.error.URLError) as error:
@@ -853,7 +985,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                             "reason": str(error)[:180]})
     candidates.sort(key=lambda c: (c["starts_at"], c["source_id"], c["title"]))
     observations.sort(key=lambda c: (c["source_id"], c["starts_at"], c["title"]))
-    ok = sum(item["status"] == "ok" for item in results)
+    ok = sum(item["status"] in ("ok", "ok_no_upcoming_in_horizon") for item in results)
     return {
         "generated_at": now.isoformat(),
         "status": "ok" if ok == len(results) else ("partial" if ok else "unavailable"),
@@ -861,6 +993,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         "queued": len(candidates),
         "candidates": candidates,
         "observed": observations,
+        "official_exclusions": official_exclusions,
         "sources": results,
         "publication": "manual_editorial_review_only",
     }
@@ -923,6 +1056,15 @@ def review_markdown(report):
     section("今後14日間・優先確認", urgent)
     section("14日より先・確認待ち", later)
     section("既存掲載との重複疑い・再登録しない", duplicates)
+    if report.get("official_exclusions"):
+        lines.extend(["## JFA公式に中止・延期表示がある日程（要確認）", ""])
+        for row in report["official_exclusions"]:
+            lines.extend([
+                f"- [ ] {row['starts_at']}｜{row['competition']}｜対戦：{row['opponent']}",
+                f"  - 出典：{row['official_url']}",
+                "  - 新規予定候補から除外。既存公開の有無と状況を編集者が確認",
+            ])
+        lines.append("")
     lines.extend(["## 情報源の状態", ""])
     for row in report["sources"]:
         lines.append(f"- {row['source_id']}: {row['status']}"
