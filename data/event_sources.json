@@ -62,5 +62,13 @@
     "kind": "zepp_schedule",
     "max_candidates": 30,
     "description": "Zepp DiverCity Tokyo公式ライブ日程。すべて未審査候補"
+  },
+  {
+    "id": "pokemon_goods_calendar",
+    "url": "https://www.pokemon.co.jp/api/info_goods/calender/",
+    "category": "グルメ・商品",
+    "kind": "pokemon_goods_json",
+    "max_candidates": 35,
+    "description": "ポケモン公式のグッズ告知カレンダー。event_date_startは発売日とは限らず審査用候補のみ"
   }
 ]
