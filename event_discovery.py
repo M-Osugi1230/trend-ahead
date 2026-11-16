@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo
 
 JST = ZoneInfo("Asia/Tokyo")
 MAX_RESPONSE_BYTES = 1_200_000
-MAX_SOURCES = 8
+MAX_SOURCES = 16
 USER_AGENT = "TrendAheadEditorialResearch/0.1 (+https://m-osugi1230.github.io/trend-ahead/)"
 HEADING_TAGS = {"h2", "h3", "h4", "h5"}
 SKIP_TAGS = {"script", "style", "noscript", "svg", "template"}
@@ -100,13 +100,14 @@ def fetch_official_page(url: str) -> str:
         raise ValueError("robots.txt disallows source retrieval")
     request = urllib.request.Request(url, headers={
         "User-Agent": USER_AGENT,
-        "Accept": "text/html,application/xhtml+xml",
+        "Accept": "text/html,application/xhtml+xml,application/json",
     })
     with opener.open(request, timeout=18) as response:
         if not allowed_https_url(response.geturl(), hostname):
             raise ValueError("final source domain changed")
         content_type = response.headers.get("Content-Type", "").lower()
-        if not ("text/html" in content_type or "application/xhtml+xml" in content_type):
+        if not ("text/html" in content_type or "application/xhtml+xml" in content_type
+                or "application/json" in content_type or "text/plain" in content_type):
             raise ValueError("source was not an HTML page")
         content = response.read(MAX_RESPONSE_BYTES + 1)
     if len(content) > MAX_RESPONSE_BYTES:
@@ -598,6 +599,64 @@ def _movie_title_key(title: str) -> str:
     return value
 
 
+
+def extract_pokemon_goods_json(raw: str, source: dict, now: datetime):
+    """Metadata-only candidate discovery from Pokémon's public goods calendar.
+
+    The calendar's event_date_start may be an announcement/campaign date rather
+    than a product availability date. It is NEVER auto-approved or published.
+    """
+    try:
+        parsed = json.loads(raw)
+    except (ValueError, TypeError):
+        return []
+    if not isinstance(parsed, dict) or not isinstance(parsed.get("results"), list):
+        return []
+    today = now.astimezone(JST).date()
+    items, seen = [], set()
+    for entry in parsed["results"]:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("model") != "goods" and entry.get("term") != "goods":
+            continue
+        raw_date = entry.get("event_date_start")
+        if not isinstance(raw_date, str):
+            continue
+        try:
+            event_date = date.fromisoformat(raw_date)
+        except ValueError:
+            continue
+        if not today <= event_date <= today + timedelta(days=90):
+            continue
+        title = entry.get("event_title") or entry.get("title")
+        if not isinstance(title, str):
+            continue
+        title = re.sub(r"\s+", " ", title).strip()
+        if not 7 <= len(title) <= 135:
+            continue
+        candidate = candidate_from_heading(title, raw_date, source, now)
+        if not candidate or candidate["candidate_id"] in seen:
+            continue
+        candidate["event_type"] = "product_or_campaign_candidate"
+        candidate["notes"] = ("ポケモン公式の告知カレンダー上の日付。"
+                              "実際の発売日・応募締切・開始時刻とは限らないため個別公式情報で要確認")
+        reference = entry.get("full_uniq")
+        if isinstance(reference, str) and reference.startswith("https://"):
+            try:
+                parts = urlsplit(reference)
+                if (parts.hostname and not parts.username and not parts.password
+                        and parts.port in (None, 443) and not any(ord(ch) < 32 for ch in reference)):
+                    candidate["review_reference_url"] = reference
+            except ValueError:
+                pass
+        candidate["date_claim"] = "calendar_metadata_unverified"
+        seen.add(candidate["candidate_id"])
+        items.append(candidate)
+        if len(items) >= source.get("max_candidates", 25):
+            break
+    return items
+
+
 def match_curated(candidate: dict, curated: list):
     match_title = normalize(candidate["title"])
     candidate_is_movie = candidate.get("event_type") == "movie_release"
@@ -628,7 +687,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
@@ -645,6 +704,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 "jra_g1_table": extract_jra_g1_dates,
                 "k_arena_dates": extract_k_arena_dates,
                 "zepp_schedule": extract_zepp_schedule,
+                "pokemon_goods_json": extract_pokemon_goods_json,
             }[source["kind"]]
             rows = extractor(html, source, now)
             added = 0
