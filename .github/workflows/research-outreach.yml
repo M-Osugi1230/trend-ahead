@@ -12,6 +12,7 @@ on:
       - 'outreach.py'
       - 'event_audit.py'
       - 'event_discovery.py'
+      - 'official_coverage.py'
       - 'event_change_monitor.py'
       - 'announcement_check.py'
       - 'data/announced_windows.json'
@@ -53,6 +54,8 @@ jobs:
             event-monitor-v1-${{ github.ref_name }}-
       - name: Discover official events for editorial review only
         run: python event_discovery.py --json-output reports/event-candidates.json --review-output reports/event-review.md
+      - name: Audit officially observed events not in approved calendar
+        run: python official_coverage.py --discovery reports/event-candidates.json --curated data/upcoming.json --sources data/event_sources.json --json-output reports/official-coverage.json --review-output reports/official-coverage.md
       - name: Compare calendar listings without assuming cancellations
         run: |
           python event_change_monitor.py --current reports/event-candidates.json --previous reports/event-snapshot.json --snapshot-out reports/event-snapshot.json --report-out reports/event-changes.json --review-out reports/event-changes.md
@@ -84,6 +87,9 @@ jobs:
       - name: Show discovery queue and failed sources
         run: |
           python -c "import json; a=json.load(open('reports/event-candidates.json')); print({k:a[k] for k in ('status','sources_ok','sources_total','queued')}); print(a['sources'])"
+      - name: Show official discovery-to-catalog gap coverage
+        run: |
+          python -c "import json; p=json.load(open('reports/official-coverage.json')); print({k:p[k] for k in ('status','sources_parseable','official_events_observed','already_in_approved_calendar','unlisted_official_candidates','possible_duplicates')})"
       - name: Show 30-day event coverage
         run: |
           python -c "import json; a=json.load(open('reports/event-audit.json')); print({k:a[k] for k in ('status','total_curated','future_7_days','future_30_days','target_30_days','missing_categories_30d')})"
