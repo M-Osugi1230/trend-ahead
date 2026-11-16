@@ -70,5 +70,13 @@
     "kind": "pokemon_goods_json",
     "max_candidates": 35,
     "description": "ポケモン公式のグッズ告知カレンダー。event_date_startは発売日とは限らず審査用候補のみ"
+  },
+  {
+    "id": "weiss_schwarz_products",
+    "url": "https://ws-tcg.com/products/",
+    "category": "グルメ・商品",
+    "kind": "tcg_product_list",
+    "max_candidates": 25,
+    "description": "ヴァイスシュヴァルツ公式商品一覧。発売日候補のみ編集審査へ登録"
   }
 ]
