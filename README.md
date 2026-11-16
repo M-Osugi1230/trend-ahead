@@ -1,4 +1,4 @@
-# Trend Ahead — Public MVP v1.2 (2026-11-17)
+# Trend Ahead — Public MVP v1.3 (2026-11-17)
 
 **明日の話題を、今日知る。**
 
@@ -109,6 +109,19 @@
 - APIキーはログに出さず、外部へのHTTPリダイレクトは拒否。配信を公開する場合は原典と一致する日時でのみ人間が承認可能
 - [GitHub Actionsの検証](https://github.com/M-Osugi1230/trend-ahead/actions/runs/43895960727)：Python**97件**＋JavaScriptの予定絞り込み・段階表示テストに成功
 - サービスの正式SEO公開は既定の`noindex`を維持。SNS自動投稿、無断DM、未審査イベントの自動掲載は行っていない
+
+## v1.3：日次差分監視・発売予定の追加・安全な自動収集
+
+- 公式確認済みの登録予定は**108件**、期限経過を除く最新の公開表示は**107件**、直近30日以内**79件**（2026年11月17日00時台の監査）
+- 遊戯王OCGの公式商品情報から発売日が確認できた4件を追加。ジャンプフェスタ限定発売と一般販売を混同しない説明を付記
+- [`event_change_monitor.py`](event_change_monitor.py)が公式情報源の前回の掲載予定と今回の掲載予定を比較し、**日時変更の可能性・見えなくなった予定・複数公演の曖昧な差分・新規掲載**を審査キュー化
+- [`event_discovery.py`](event_discovery.py)の`observed`に**既に公開した予定も含む生の検知結果**を保存。公開前の新規候補だけを比較して掲載済みの変更を見逃す問題を防止
+- 過去の公式掲載スナップショットはGitHub Actionsのキャッシュで引き継ぎ、[毎朝の審査パック](https://github.com/M-Osugi1230/trend-ahead/actions/workflows/research-outreach.yml)に`event-changes.json`・`event-changes.md`を含める
+- **未再検出は中止確定ではない**。クロール失敗・一覧の上限・ソース更新などによって起きるため、日時変更や消失について人の確認なしに削除・延期表示・`verified_at`更新はしない
+- 新しい遊戯王OCG公式商品一覧は、GitHub Actions環境では許可していない別ホストへの転送が発生。取得制約を緩めず、自動情報源登録を停止。**現在の自動収集は10/10情報源成功**。公式ページの手動一次確認による登録は継続
+- 最新監査で**差分疑い0件、取得エラー0件**。差分の検知能力はテストで検証済みだが、実際の延期・中止発生時の検知実績は今後検証が必要
+- [Python108件＋JavaScript UIテスト](https://github.com/M-Osugi1230/trend-ahead/actions/runs/43899358035)成功。GitHub PagesへのデプロイおよびHTTP検証も成功
+- 公式YouTube配信APIは実装済みだが、キーと承認チャンネル未設定につき**実運用未開始**。`noindex`安全設定は維持
 
 ## できること
 
