@@ -75,12 +75,18 @@ def check(announcements, now, fetcher=fetch_official_page):
         except (ValueError, OSError, RuntimeError):
             # A failed fetch is not permission to bypass robots or conclude change.
             status = "official_page_unavailable"
+        last_verified = datetime.fromisoformat(item["verified_at"])
+        stale = (now - last_verified).total_seconds() > 30 * 86400
+        if stale:
+            status = "editor_verification_older_than_30_days"
         checked.append({
             "title": item["title"],
             "period": item["period"],
             "official_url": item["official_url"],
             "status": status,
             "observed_months": observed_months[:8],
+            "verified_at": item["verified_at"],
+            "verification_stale": stale,
         })
     concerns = [x for x in checked if x["status"] != "month_still_visible"]
     return {
@@ -124,7 +130,7 @@ def main():
     parser.add_argument("--review-output", type=Path, default=Path("reports/announcement-check.md"))
     args = parser.parse_args()
     now = datetime.now(timezone.utc)
-    catalog = load_announced_windows(args.catalog, now)
+    catalog = load_announced_windows(args.catalog, now, include_stale=True)
     result = check(catalog, now)
     for path, value in (
         (args.output, json.dumps(result, ensure_ascii=False, indent=2) + "\n"),
