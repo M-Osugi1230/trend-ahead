@@ -8,12 +8,28 @@
     "verified_at": "2026-11-16T08:49:00+09:00"
   },
   {
+    "title": "TOMOO Arena Tour 2026 ぴあアリーナMM公演 DAY1",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-18",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
     "title": "スマートファクトリーJapan2026 開幕",
     "category": "テクノロジー",
     "description": "東京ビッグサイト。製造業DX・ロボティクスなどの専門展示会。",
     "starts_at": "2026-11-18T10:00:00+09:00",
     "official_url": "https://biz.nikkan.co.jp/eve/smart-factory/overview.html",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "TOMOO Arena Tour 2026 ぴあアリーナMM公演 DAY2",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-19",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
     "title": "映画『魔法使いの夜』公開",
@@ -32,6 +48,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "M!LK ARENA TOUR 2026-2027 ぴあアリーナMM公演 DAY1",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-21",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
     "title": "『可愛いだけじゃない！？ピングー展』福岡開幕",
     "category": "映画・アニメ",
     "description": "福岡市科学館で開催。会期は2027年1月11日まで。",
@@ -46,6 +70,14 @@
     "starts_at": "2026-11-21T15:00:00+09:00",
     "official_url": "https://dreamfestival.jp/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "M!LK ARENA TOUR 2026-2027 ぴあアリーナMM公演 DAY2",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-22",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
     "title": "ポケモンカード CL2027千葉 現地大会DAY1",
@@ -96,6 +128,14 @@
     "verified_at": "2026-11-15T16:26:11+09:00"
   },
   {
+    "title": "DUSTCELL LIVE 2026 ぴあアリーナMM公演",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-23",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
     "title": "ポケモンカード CL2027千葉 DAY2 配信",
     "category": "配信・YouTuber",
     "starts_at": "2026-11-23T08:40:00+09:00",
@@ -118,6 +158,14 @@
     "starts_at": "2026-11-23T15:00:00+09:00",
     "official_url": "https://dreamfestival.jp/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "Juice=Juice Room Tour 2026 ぴあアリーナMM公演",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-25",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
     "title": "『Destruction AllStars』オンラインサービス終了",
@@ -160,6 +208,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "山下智久 TOUR 2026 DREAMING ぴあアリーナMM公演 DAY1",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-28",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
     "title": "あんスタ THE STAGE 10周年衣裳展 前期開幕",
     "category": "映画・アニメ",
     "description": "東京アニメセンター、渋谷。前期衣裳展示がスタート。",
@@ -174,6 +230,14 @@
     "starts_at": "2026-11-28T17:00:00+09:00",
     "official_url": "https://rock-anthem.jp/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "山下智久 TOUR 2026 DREAMING ぴあアリーナMM公演 DAY2",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-29",
+    "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
+    "official_url": "https://pia-arena-mm.jp/event/index.html",
+    "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
     "title": "第46回 ジャパンカップ（GⅠ）",
@@ -320,6 +384,22 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "映画『SUKIYAKI 上を向いて歩こう』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2026-12-25",
+    "description": "東宝公式ラインナップに掲載された劇場公開日。上映時刻は各映画館で確認。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "映画『キャット・イン・ザ・ハット』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2026-12-25",
+    "description": "ワーナー・ブラザース公式に掲載された劇場公開予定日。",
+    "official_url": "https://www.warnerbros.co.jp/movie/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
     "title": "COUNTDOWN JAPAN 26/27 開幕",
     "category": "音楽・ライブ",
     "starts_at": "2026-12-26T12:00:00+09:00",
@@ -334,5 +414,53 @@
     "description": "幕張メッセ。大晦日15:40開演予定。全券種完売のためチケットの可否は公式で確認。",
     "official_url": "https://countdownjapan.jp/2627/home/",
     "verified_at": "2026-11-16T08:49:00+09:00"
+  },
+  {
+    "title": "映画『九条の大罪』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2027-01-08",
+    "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "劇場版『虎に翼』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2027-01-15",
+    "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "劇場版『40までにしたい10のこと』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2027-01-22",
+    "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "映画『カイジ 人生リベンジゲーム』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2027-01-29",
+    "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "映画『フラガール 4K』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2027-02-05",
+    "description": "東宝公式ラインナップに掲載された4K版劇場公開予定日。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "映画『リバイアサン』公開",
+    "category": "映画・アニメ",
+    "starts_at": "2027-02-11",
+    "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
+    "official_url": "https://www.toho.co.jp/movie/lineup/",
+    "verified_at": "2026-11-16T16:16:00+09:00"
   }
 ]
