@@ -11,6 +11,7 @@ from event_discovery import (
     extract_jra_g1_dates,
     extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
     extract_pokemon_goods_json,
+    extract_tcg_product_list,
     extract_k_arena_dates, extract_zepp_schedule,
 )
 
@@ -368,6 +369,34 @@ class DiscoveryTests(unittest.TestCase):
         report = discover([source], [], NOW, lambda _: "<html>not JSON</html>")
         self.assertEqual(report["sources_ok"], 0)
         self.assertEqual(report["sources"][0]["status"], "no_parseable_items")
+
+    def test_official_tcg_products_need_explicit_release_date_and_review(self):
+        source = {"id": "weiss_schwarz_products", "url": "https://ws-tcg.com/products/",
+                  "category": "グルメ・商品", "kind": "tcg_product_list",
+                  "max_candidates": 25}
+        html = """<ul>
+        <li>ブースターパック Persona 30th Anniversary 発売日：2026年11月27日(金)</li>
+        <li>プレミアムブースター 超かぐや姫！ 発売日：2026年12月18日(金)</li>
+        <li>トライアルデッキ 過去作品 発売日：2025年12月12日(金)</li>
+        <li>商品ニュース ブースターパック 発売記念企画 2027年1月12日</li>
+        </ul>"""
+        rows = extract_tcg_product_list(html, source, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["starts_at"], "2026-11-27")
+        self.assertIn("Persona 30th Anniversary", rows[0]["title"])
+        self.assertEqual(rows[1]["starts_at"], "2026-12-18")
+        self.assertEqual(rows[0]["event_type"], "tcg_release")
+        self.assertTrue(all(row["status"] == "needs_review" for row in rows))
+        self.assertTrue(all("verified_at" not in row for row in rows))
+        report = discover([source], [], NOW, lambda _: html)
+        self.assertEqual(report["sources_ok"], 1)
+        self.assertEqual(report["queued"], 2)
+
+    def test_tcg_publisher_does_not_infer_release_from_post_date(self):
+        source = {"id": "weiss_schwarz_products", "url": "https://ws-tcg.com/products/",
+                  "category": "グルメ・商品", "kind": "tcg_product_list"}
+        html = "<ul><li>2026年12月1日　新商品のお知らせ ブースターパック</li></ul>"
+        self.assertEqual(extract_tcg_product_list(html, source, NOW), [])
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
