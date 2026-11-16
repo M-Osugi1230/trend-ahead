@@ -459,42 +459,65 @@ JRA_DATE = re.compile(r"(?<!\d)(?P<month>0?[1-9]|1[0-2])\s*月\s*"
 
 
 def extract_jra_g1_dates(html: str, source: dict, now: datetime):
-    """Explicit year + official GI table dates. No guessed race start times."""
+    """JRA official GI schedule: structured table first, visible text fallback.
+
+    Both forms produce review-only date candidates; no start times are inferred.
+    """
     parser = TableRowTextExtractor()
     parser.feed(html)
-    found, seen = [], set()
-    year = source.get("season_year")
-    if not isinstance(year, int) or year < 2020 or year > 2100:
-        return found
-    today = now.astimezone(JST).date()
+    rows = []
     for cells in parser.rows:
         if len(cells) < 2:
             continue
-        when = JRA_DATE.search(cells[0])
-        if not when:
+        date_match = JRA_DATE.search(cells[0])
+        if not date_match:
             continue
+        label = cells[1].strip()
+        grade_match = re.match(r"^(?:J・)?G[ⅠI１](?![ⅠI１])\s*(.+)", label)
+        if not grade_match:
+            continue
+        rows.append((date_match.group("month"), date_match.group("day"),
+                     grade_match.group(1).strip()))
+
+    # JRA has multiple HTML presentations. A page with div/list content can
+    # contain the same public schedule even without table rows.
+    if not rows:
+        visible = HeadingTextExtractor()
+        visible.feed(html)
+        text = re.sub(r"\s+", " ", " ".join(x[1] for x in visible.blocks))
+        fallback = re.compile(
+            r"(?P<month>0?[1-9]|1[0-2])月(?P<day>0?[1-9]|[12]\d|3[01])日"
+            r"(?:月曜|火曜|水曜|木曜|金曜|土曜|日曜)?\s*"
+            r"(?:J・)?G[ⅠI１]\s*(?P<title>.{5,70}?)\s+"
+            r"(?:東京|中山|京都|阪神|中京|新潟|小倉|福島|札幌|函館)(?:\s|$)"
+        )
+        rows = [(m.group("month"), m.group("day"), m.group("title").strip())
+                for m in fallback.finditer(text)]
+
+    result, seen = [], set()
+    year = source.get("season_year")
+    if not isinstance(year, int) or not 2020 <= year <= 2100:
+        return result
+    today = now.astimezone(JST).date()
+    for month, day, name in rows:
         try:
-            starts = date(year, int(when.group("month")), int(when.group("day")))
+            starts = date(year, int(month), int(day))
         except ValueError:
             continue
         if not today <= starts <= today + timedelta(days=90):
             continue
-        name = cells[1].strip()
-        # GI only, avoid GII / GIII / historical result labels.
-        if not re.match(r"^(?:J・)?G[ⅠI１](?![ⅠI１])", name):
+        name = re.sub(r"\s+", " ", name).strip()
+        if not 5 <= len(name) <= 100:
             continue
-        title = re.sub(r"^(?:J・)?G[ⅠI１]\s*", "", name).strip()
-        if not 5 <= len(title) <= 100:
-            continue
-        candidate = candidate_from_heading(title + "（GⅠ）", starts.isoformat(), source, now)
+        candidate = candidate_from_heading(name + "（GⅠ）", starts.isoformat(), source, now)
         if candidate and candidate["candidate_id"] not in seen:
             candidate["event_type"] = "horse_race"
-            candidate["notes"] = "JRA公式日程の開催日候補。発走時刻・中止を確認"
+            candidate["notes"] = "公式GⅠ日程の開催日候補。発走時刻・中止を再確認"
             seen.add(candidate["candidate_id"])
-            found.append(candidate)
-        if len(found) >= source.get("max_candidates", 25):
+            result.append(candidate)
+        if len(result) >= source.get("max_candidates", 25):
             break
-    return found
+    return result
 
 
 K_ARENA_DATE = re.compile(
@@ -634,7 +657,10 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                     continue
                 candidates.append(item)
                 added += 1
-            results.append({"source_id": source_id, "status": "ok",
+            # A successful HTTP request with zero parsed dates is NOT a
+            # successful content source. Surface the mismatch for review.
+            status = "ok" if rows else "no_parseable_items"
+            results.append({"source_id": source_id, "status": status,
                             "extracted": len(rows), "queued": added})
         except (ValueError, OSError, urllib.error.URLError) as error:
             results.append({"source_id": source_id, "status": "fetch_or_parse_error",
