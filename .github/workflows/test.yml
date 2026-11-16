@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - "collector.py"
+      - "forecast_ledger.py"
+      - "collection_health.py"
       - "backtest.py"
       - "outreach.py"
       - "event_audit.py"
