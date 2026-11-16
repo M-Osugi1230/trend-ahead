@@ -1,0 +1,64 @@
+{
+  "google_trends_jp": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_top": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_sns": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_entertainment": {
+    "consecutive_429": 1,
+    "last_429_at": "2026-11-16T22:52:02+00:00",
+    "cooldown_until": "2026-11-16T23:52:02+00:00"
+  },
+  "news_game": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_music": {
+    "consecutive_429": 1,
+    "last_429_at": "2026-11-16T22:52:02+00:00",
+    "cooldown_until": "2026-11-16T23:52:02+00:00"
+  },
+  "news_sports": {
+    "consecutive_429": 1,
+    "last_429_at": "2026-11-16T22:52:02+00:00",
+    "cooldown_until": "2026-11-16T23:52:02+00:00"
+  },
+  "news_anime": {
+    "consecutive_429": 1,
+    "last_429_at": "2026-11-16T22:52:02+00:00",
+    "cooldown_until": "2026-11-16T23:52:02+00:00"
+  },
+  "news_stream": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_food": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_events": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  },
+  "news_tech": {
+    "consecutive_429": 1,
+    "last_429_at": "2026-11-16T22:52:02+00:00",
+    "cooldown_until": "2026-11-16T23:52:02+00:00"
+  },
+  "news_society": {
+    "consecutive_429": 1,
+    "last_429_at": "2026-11-16T22:52:02+00:00",
+    "cooldown_until": "2026-11-16T23:52:02+00:00"
+  },
+  "news_misc": {
+    "consecutive_429": 0,
+    "last_success_at": "2026-11-16T22:52:02+00:00"
+  }
+}
