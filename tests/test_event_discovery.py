@@ -10,6 +10,7 @@ from event_discovery import (
     extract_game_title_date,
     extract_jra_g1_dates,
     extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
+    extract_pokemon_goods_json,
     extract_k_arena_dates, extract_zepp_schedule,
 )
 
@@ -303,6 +304,69 @@ class DiscoveryTests(unittest.TestCase):
         report = discover([source], [], NOW, lambda _: "<html><body>JavaScript required</body></html>")
         self.assertEqual(report["sources_ok"], 0)
         self.assertEqual(report["status"], "unavailable")
+        self.assertEqual(report["sources"][0]["status"], "no_parseable_items")
+
+    def test_pokemon_goods_calendar_stays_unverified(self):
+        source = {
+            "id": "pokemon_goods_calendar",
+            "url": "https://www.pokemon.co.jp/api/info_goods/calender/",
+            "category": "グルメ・商品",
+            "kind": "pokemon_goods_json",
+            "max_candidates": 20,
+        }
+        payload = {
+            "results": [
+                {
+                    "model": "goods", "term": "goods",
+                    "event_title": "ポケモン新作グッズ発売の予定",
+                    "event_date_start": "2026-11-27",
+                    "full_uniq": "https://www.pokemon.co.jp/goods/2026/11/item.html",
+                },
+                {
+                    "model": "goods", "term": "goods",
+                    "event_title": "もう販売済みのアイテム",
+                    "event_date_start": "2026-11-01",
+                },
+                {
+                    "model": "info", "term": "campaign",
+                    "event_title": "キャンペーン告知",
+                    "event_date_start": "2026-12-20",
+                },
+                {
+                    "model": "goods", "term": "goods",
+                    "event_title": "日付が無効な商品",
+                    "event_date_start": "2026-02-30",
+                },
+            ]
+        }
+        import json
+        rows = extract_pokemon_goods_json(json.dumps(payload, ensure_ascii=False), source, NOW)
+        self.assertEqual(len(rows), 1)
+        item = rows[0]
+        self.assertEqual(item["starts_at"], "2026-11-27")
+        self.assertEqual(item["category"], "グルメ・商品")
+        self.assertEqual(item["event_type"], "product_or_campaign_candidate")
+        self.assertEqual(item["date_claim"], "calendar_metadata_unverified")
+        self.assertEqual(item["status"], "needs_review")
+        self.assertNotIn("verified_at", item)
+        self.assertIn("発売日とは限らない", item["notes"])
+        self.assertEqual(item["official_url"], source["url"])
+
+        report = discover([source], [], NOW, lambda _: json.dumps(payload, ensure_ascii=False))
+        self.assertEqual(report["sources_ok"], 1)
+        self.assertEqual(report["queued"], 1)
+        self.assertEqual(report["publication"], "manual_editorial_review_only")
+
+    def test_malformed_official_json_never_creates_events(self):
+        source = {
+            "id": "pokemon_goods_calendar",
+            "url": "https://www.pokemon.co.jp/api/info_goods/calender/",
+            "category": "グルメ・商品", "kind": "pokemon_goods_json",
+        }
+        self.assertEqual(extract_pokemon_goods_json("<html>not JSON</html>", source, NOW), [])
+        self.assertEqual(extract_pokemon_goods_json('{"results":{}}', source, NOW), [])
+        report = discover([source], [], NOW, lambda _: "<html>not JSON</html>")
+        self.assertEqual(report["sources_ok"], 0)
         self.assertEqual(report["sources"][0]["status"], "no_parseable_items")
 
     def test_normalization_is_deterministic(self):
