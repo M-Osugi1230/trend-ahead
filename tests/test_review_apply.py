@@ -61,6 +61,36 @@ class ReviewApplyTest(unittest.TestCase):
         self.assertTrue(stats["errors"])
         self.assertEqual(result, existing)
 
+    def test_youtube_scheduled_time_can_be_approved_only_exactly(self):
+        youtube = {
+            "candidate_id": "youtube_candidate_0001", "title": "ゲーム公式生配信のお知らせ",
+            "starts_at": "2026-11-22T19:00:00+09:00",
+            "category": "ゲーム", "status": "needs_review",
+            "official_url": "https://www.youtube.com/watch?v=ABCDEFGHIJK"
+        }
+        queue = {"publication": "manual_editorial_review_only", "candidates": [youtube]}
+        approval = {
+            "candidate_id": youtube["candidate_id"],
+            "title": youtube["title"],
+            "starts_at": youtube["starts_at"],
+            "category": youtube["category"],
+            "description": "公式チャンネルで配信日時を確認",
+            "official_url": youtube["official_url"],
+            "verified_at": NOW.isoformat(),
+            "reviewer": "editor_1",
+            "review_note": "動画ページの配信予約を目視確認",
+            "status": "approved", "source_confirmed": True,
+        }
+        result, stats = prepare(queue, [approval], [], NOW)
+        self.assertEqual(stats["errors"], [])
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["starts_at"], youtube["starts_at"])
+
+        for altered in ("2026-11-22", "2026-11-22T19:30:00+09:00"):
+            result, stats = prepare(queue, [dict(approval, starts_at=altered)], [], NOW)
+            self.assertEqual(result, [])
+            self.assertEqual(len(stats["errors"]), 1)
+
     def test_missing_review_origin_is_rejected(self):
         with self.assertRaises(ValueError):
             prepare({"candidates": [CANDIDATE]}, [self.approved()], [], NOW)
