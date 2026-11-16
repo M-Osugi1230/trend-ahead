@@ -63,7 +63,8 @@ class TrendLearningTest(unittest.TestCase):
             self.assertEqual(stats["same_or_mixed_bucket"], 1)
             self.assertEqual(stats["insufficient_observations"], 1)
             self.assertFalse(report["prediction_accuracy_claim"])
-            self.assertFalse(stats["examples"]["growth"][0]["forecast_was_issued"])
+            self.assertEqual(stats["examples"]["growth"][0]["forecast_issuance_status"],
+                             "unverified")
             self.assertEqual(stats["examples"]["growth"][0]["title"], "Game | New")
             self.assertEqual(report["prospective_three_hour_evaluation"]["status"],
                              "insufficient_data")
