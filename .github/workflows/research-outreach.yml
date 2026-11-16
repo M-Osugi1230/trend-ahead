@@ -9,6 +9,8 @@ on:
       - 'event_audit.py'
       - 'event_discovery.py'
       - 'event_change_monitor.py'
+      - 'announcement_check.py'
+      - 'data/announced_windows.json'
       - 'youtube_upcoming.py'
       - 'data/youtube_channels.json'
       - 'data/event_sources.json'
@@ -53,6 +55,8 @@ jobs:
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: python youtube_upcoming.py --channels data/youtube_channels.json --output reports/youtube-candidates.json --review-output reports/youtube-review.md
+      - name: Recheck official month-only announcements (review only)
+        run: python announcement_check.py --catalog data/announced_windows.json --output reports/announcement-check.json --review-output reports/announcement-check.md
       - name: Review event catalog freshness and coverage
         run: python event_audit.py --output reports/event-audit.json
       - name: Create review-only Japanese outreach drafts
