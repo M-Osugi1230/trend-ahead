@@ -16,6 +16,7 @@ on:
       - "signal_engine.py"
       - "build_site.py"
       - "announced_windows.py"
+      - "announcement_check.py"
       - "data/announced_windows.json"
       - "web/**"
       - "data/upcoming.json"
