@@ -41,6 +41,7 @@ const search = element();
 const category = element('all');
 const count = element();
 const empty = element();
+const more = element();
 const buttons = Object.fromEntries(['all', '7', '30'].map(key => {
   const button = element();
   button.dataset.futureWindow = key;
@@ -50,7 +51,8 @@ const ids = {
   'future-search': search,
   'future-category': category,
   'future-result-status': count,
-  'future-empty': empty
+  'future-empty': empty,
+  'future-load-more': more
 };
 const document = {
   getElementById(id) { return ids[id] || null; },
@@ -99,4 +101,27 @@ category.listeners.change();
 search.value = '';
 search.listeners.input();
 assert.deepEqual(cards.map(c => c.hidden), [false, false, false]);
+// Once the catalog expands, only 12 items should appear until explicitly requested.
+for (let i = 0; i < 25; i++) cards.push(makeCard(i + 1, 'ゲーム', '追加イベント'));
+search.value = '';
+category.value = 'all';
+buttons.all.listeners.click();
+assert.equal(cards.filter(card => !card.hidden).length, 12);
+assert.equal(more.hidden, false);
+assert.match(count.textContent, /^28件中 12件を表示/);
+more.listeners.click();
+assert.equal(cards.filter(card => !card.hidden).length, 24);
+assert.equal(more.hidden, false);
+more.listeners.click();
+assert.equal(cards.filter(card => !card.hidden).length, 28);
+assert.equal(more.hidden, true);
+search.value = '存在しない';
+search.listeners.input();
+assert.equal(cards.filter(card => !card.hidden).length, 0);
+assert.equal(more.hidden, true);
+search.value = '追加イベント';
+search.listeners.input();
+assert.equal(cards.filter(card => !card.hidden).length, 12);
+assert.match(count.textContent, /^25件中 12件を表示/);
+
 console.log('Future filter browser-script tests passed');
