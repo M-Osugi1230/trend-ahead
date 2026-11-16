@@ -160,7 +160,8 @@ class HeadingTextExtractor(HTMLParser):
 
 def candidate_from_heading(title, following, source, now):
     title = re.sub(r"\s+", " ", title).strip()
-    if not 7 <= len(title) <= 150 or GENERIC_TITLE.fullmatch(title):
+    min_title_length = 3 if source.get("kind") in ("movie_title_date", "movie_date_title") else 7
+    if not min_title_length <= len(title) <= 150 or GENERIC_TITLE.fullmatch(title):
         return None
     # Capture the FIRST date after the heading; never infer time from venue hours.
     match = JP_DATE.search(following)
@@ -175,7 +176,7 @@ def candidate_from_heading(title, following, source, now):
         return None
     source_url = source["url"]
     normalized_title = normalize(title)
-    if len(normalized_title) < 5:
+    if len(normalized_title) < min_title_length:
         return None
     identity = f'{source["id"]}|{normalized_title}|{starts.isoformat()}'
     return {
@@ -300,7 +301,7 @@ def extract_movie_title_date(html: str, source: dict, now: datetime):
             continue
         title = item[:match.start()].strip()
         title = re.sub(r"^(公開予定作品|Coming Soon|映画作品ラインナップ)\s*", "", title)
-        if not 5 <= len(title) <= 120 or "公開中" in title:
+        if not 3 <= len(title) <= 120 or "公開中" in title:
             continue
         candidate = candidate_from_heading(title, match.group(0), source, now)
         if candidate and candidate["candidate_id"] not in seen:
