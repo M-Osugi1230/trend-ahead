@@ -250,6 +250,135 @@ def extract_date_title_rows(html: str, source: dict, now: datetime):
             break
     return found
 
+
+class ListItemExtractor(HTMLParser):
+    """Collect visible list-item text, preserving per-item boundaries."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.items = []
+        self.depth = 0
+        self.skip_depth = 0
+        self.parts = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in SKIP_TAGS:
+            self.skip_depth += 1
+        if self.skip_depth:
+            return
+        if tag == "li":
+            if self.depth == 0:
+                self.parts = []
+            self.depth += 1
+
+    def handle_endtag(self, tag):
+        if self.skip_depth:
+            if tag in SKIP_TAGS:
+                self.skip_depth -= 1
+            return
+        if tag == "li" and self.depth:
+            self.depth -= 1
+            if self.depth == 0:
+                item = re.sub(r"\s+", " ", " ".join(self.parts)).strip()
+                if item:
+                    self.items.append(item)
+                self.parts = []
+
+    def handle_data(self, data):
+        if self.depth and not self.skip_depth and data.strip():
+            self.parts.append(data.strip())
+
+
+def extract_movie_title_date(html: str, source: dict, now: datetime):
+    """Official movie catalogs with movie title before its release date."""
+    parser = ListItemExtractor()
+    parser.feed(html)
+    found = []
+    seen = set()
+    for item in parser.items:
+        match = JP_DATE.search(item)
+        if not match:
+            continue
+        title = item[:match.start()].strip()
+        title = re.sub(r"^(公開予定作品|Coming Soon|映画作品ラインナップ)\s*", "", title)
+        if not 5 <= len(title) <= 120 or "公開中" in title:
+            continue
+        candidate = candidate_from_heading(title, match.group(0), source, now)
+        if candidate and candidate["candidate_id"] not in seen:
+            candidate["event_type"] = "movie_release"
+            seen.add(candidate["candidate_id"])
+            found.append(candidate)
+        if len(found) >= source.get("max_candidates", 25):
+            break
+    return found
+
+
+def extract_movie_date_title(html: str, source: dict, now: datetime):
+    """Official movie lists with date and 公開映画『title』 in one list item."""
+    parser = ListItemExtractor()
+    parser.feed(html)
+    found = []
+    seen = set()
+    for item in parser.items:
+        match = JP_DATE.search(item)
+        if not match:
+            continue
+        tail = item[match.end():]
+        title_match = re.search(
+            r"公開\s*映画[『「](.{3,105}?)[』」]\s*(?:近日公開|公開中|$)", tail
+        )
+        if not title_match:
+            continue
+        title = title_match.group(1).strip()
+        candidate = candidate_from_heading(title, match.group(0), source, now)
+        if candidate and candidate["candidate_id"] not in seen:
+            candidate["event_type"] = "movie_release"
+            seen.add(candidate["candidate_id"])
+            found.append(candidate)
+        if len(found) >= source.get("max_candidates", 25):
+            break
+    return found
+
+
+ARENA_LISTING = re.compile(
+    r"^(?P<month>0?[1-9]|1[0-2])\.(?P<day>0?[1-9]|[12][0-9]|3[01])"
+    r"\s+(?:MON|TUE|WED|THU|FRI|SAT|SUN)\s+(?P<title>.+)$",
+    re.IGNORECASE,
+)
+
+
+def extract_arena_month_day(html: str, source: dict, now: datetime):
+    """Official concert venue list, month/day with weekday and event title."""
+    parser = ListItemExtractor()
+    parser.feed(html)
+    today = now.astimezone(JST).date()
+    found = []
+    seen = set()
+    for item in parser.items:
+        match = ARENA_LISTING.fullmatch(item.strip())
+        if not match:
+            continue
+        title = match.group("title").strip()
+        if title.upper() == "PRIVATE" or not 6 <= len(title) <= 150:
+            continue
+        year = today.year + int(int(match.group("month")) < today.month)
+        try:
+            starts = date(year, int(match.group("month")), int(match.group("day")))
+        except ValueError:
+            continue
+        if not today <= starts <= today + timedelta(days=90):
+            continue
+        candidate = candidate_from_heading(
+            title, starts.strftime("%Y-%m-%d"), source, now
+        )
+        if candidate and candidate["candidate_id"] not in seen:
+            candidate["event_type"] = "concert"
+            seen.add(candidate["candidate_id"])
+            found.append(candidate)
+        if len(found) >= source.get("max_candidates", 35):
+            break
+    return found
+
+
 def match_curated(candidate: dict, curated: list):
     # Only exact same normalized titles/dates can be confidently de-duplicated.
     match_title = normalize(candidate["title"])
@@ -276,16 +405,21 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
             continue
         try:
             html = fetcher(url)
-            rows = (extract_heading_dates(html, source, now)
-                    if source["kind"] == "heading_dates"
-                    else extract_date_title_rows(html, source, now))
+            extractor = {
+                "heading_dates": extract_heading_dates,
+                "date_then_title": extract_date_title_rows,
+                "movie_title_date": extract_movie_title_date,
+                "movie_date_title": extract_movie_date_title,
+                "arena_month_day": extract_arena_month_day,
+            }[source["kind"]]
+            rows = extractor(html, source, now)
             added = 0
             for item in rows:
                 if item["candidate_id"] in seen:
