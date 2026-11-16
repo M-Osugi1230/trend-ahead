@@ -38,5 +38,13 @@
     "kind": "arena_month_day",
     "max_candidates": 40,
     "description": "ぴあアリーナMM公式の開催予定。公演時刻や入場可否は個別に確認"
+  },
+  {
+    "id": "nintendo_switch2",
+    "url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html?category=edition",
+    "category": "ゲーム",
+    "kind": "game_title_date",
+    "max_candidates": 20,
+    "description": "任天堂公式Switch 2発売予定一覧。日時が確認できる候補のみ（審査前）"
   }
 ]
