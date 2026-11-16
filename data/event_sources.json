@@ -40,11 +40,12 @@
     "description": "ぴあアリーナMM公式の開催予定。公演時刻や入場可否は個別に確認"
   },
   {
-    "id": "nintendo_switch2",
-    "url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html?category=edition",
-    "category": "ゲーム",
-    "kind": "game_title_date",
+    "id": "jra_g1",
+    "url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "category": "スポーツ",
+    "kind": "jra_g1_table",
+    "season_year": 2026,
     "max_candidates": 20,
-    "description": "任天堂公式Switch 2発売予定一覧。日時が確認できる候補のみ（審査前）"
+    "description": "JRA公式GⅠ日程。開始時刻は別途確認、審査前候補のみ"
   }
 ]
