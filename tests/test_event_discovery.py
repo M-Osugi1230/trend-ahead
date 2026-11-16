@@ -280,6 +280,31 @@ class DiscoveryTests(unittest.TestCase):
             "category": "映画・アニメ"
         }]), "exact_curated")
 
+    def test_jra_visible_schedule_without_table_is_staged(self):
+        source = {
+            "id": "jra_g1", "url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+            "kind": "jra_g1_table", "category": "スポーツ",
+            "season_year": 2026, "max_candidates": 20,
+        }
+        html = """<main><div>11月22日日曜</div><div>GⅠマイルチャンピオンシップ</div>
+        <span>京都</span><div>12月20日日曜</div><div>GⅠ朝日杯フューチュリティS</div>
+        <span>阪神</span></main>"""
+        result = extract_jra_g1_dates(html, source, NOW)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["starts_at"], "2026-11-22")
+        self.assertEqual(result[1]["starts_at"], "2026-12-20")
+
+    def test_empty_extractor_does_not_report_success(self):
+        source = {
+            "id": "nintendo_switch2",
+            "url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html",
+            "kind": "game_title_date", "category": "ゲーム", "max_candidates": 20,
+        }
+        report = discover([source], [], NOW, lambda _: "<html><body>JavaScript required</body></html>")
+        self.assertEqual(report["sources_ok"], 0)
+        self.assertEqual(report["status"], "unavailable")
+        self.assertEqual(report["sources"][0]["status"], "no_parseable_items")
+
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
 
