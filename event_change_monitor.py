@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -222,6 +223,29 @@ def main():
         "no_longer_seen_to_check": len(result["no_longer_seen_to_check"]),
         "source_issues": len(result["source_issues"]),
     }, ensure_ascii=False))
+    if result["status"] == "attention":
+        # Workflow warnings notify repository operators without falsely claiming
+        # that an event was cancelled or automatically editing public content.
+        print("::warning title=Official event review required::"
+              "Source listing changed or could not be parsed. "
+              "Open the event-changes.md review artifact.")
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        summary = [
+            "### Trend Ahead｜公式予定の変化監視",
+            "",
+            f"- 比較可能な公式ソース：{len(result['comparison_sources'])}件",
+            f"- 日時変更の確認候補：{len(result['date_changes_to_check'])}件",
+            f"- 前回あった掲載が見えない候補：{len(result['no_longer_seen_to_check'])}件",
+            f"- 取得・抽出に問題のあるソース：{len(result['source_issues'])}件",
+            f"- 状態：`{result['status']}`",
+            "",
+            "掲載消失は中止確定ではありません。公開情報は自動修正されません。",
+            "詳細はArtifactのevent-changes.mdを確認してください。",
+            "",
+        ]
+        with open(summary_path, "a", encoding="utf-8") as file:
+            file.write("\n".join(summary) + "\n")
 
 
 if __name__ == "__main__":
