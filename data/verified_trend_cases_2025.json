@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "year": 2025,
+  "ranking_window": "2025-01-01 to 2025-11-20",
+  "published_at": "2025-12-04",
+  "source_url": "https://blog.google/intl/ja-jp/products/explore-get-answers/year-in-search-2025/",
+  "ranking_url": "https://trends.withgoogle.com/year-in-search/2025/jp/",
+  "purpose": "Verified retrospective outcomes for studying patterns, NOT pre-event prediction labels or training timestamps.",
+  "cases": [
+    {
+      "topic": "ドジャース 対 ブルー ジェイズ",
+      "ranking_group": "総合急上昇",
+      "rank": 5,
+      "pattern_hypothesis": "scheduled_event_with_unpredictable_result",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "モンスターハンターワイルズ",
+      "ranking_group": "総合急上昇",
+      "rank": 6,
+      "pattern_hypothesis": "announced_game_release",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "Pokémon LEGENDS Z-A",
+      "ranking_group": "総合急上昇",
+      "rank": 7,
+      "pattern_hypothesis": "announced_game_release",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "東京2025世界陸上",
+      "ranking_group": "総合急上昇",
+      "rank": 8,
+      "pattern_hypothesis": "scheduled_sports_event",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "ラブブ",
+      "ranking_group": "ぬいぐるみ関連",
+      "rank": 1,
+      "pattern_hypothesis": "product_culture_diffusion",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "ミャクミャク",
+      "ranking_group": "ぬいぐるみ関連",
+      "rank": 2,
+      "pattern_hypothesis": "scheduled_event_product_spillover",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "せいろ蒸し",
+      "ranking_group": "レシピ関連",
+      "rank": 1,
+      "pattern_hypothesis": "recurring_lifestyle_diffusion",
+      "ex_ante_evidence": null
+    },
+    {
+      "topic": "麻辣湯",
+      "ranking_group": "レシピ関連",
+      "rank": 3,
+      "pattern_hypothesis": "food_culture_diffusion",
+      "ex_ante_evidence": null
+    }
+  ]
+}

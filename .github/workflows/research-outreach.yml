@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'backtest.py'
+      - 'trend_learning.py'
+      - 'data/verified_trend_cases_2025.json'
       - 'outreach.py'
       - 'event_audit.py'
       - 'event_discovery.py'
@@ -34,6 +36,8 @@ jobs:
           python-version: "3.12"
       - name: Research-only retrospective evaluation
         run: python backtest.py --output reports/backtest.json
+      - name: Audit actual historic trend outcomes and collected RSS growth
+        run: python trend_learning.py --json-output reports/trend-learning.json --markdown-output reports/trend-learning.md
       - name: Restore prior official-event observation snapshot
         uses: actions/cache/restore@v4
         with:
@@ -64,6 +68,9 @@ jobs:
       - name: Show sample sufficiency, not invented accuracy
         run: |
           python -c "import json; p=json.load(open('reports/backtest.json')); print({k:p[k] for k in ('status','labeled_cases','days_with_labels','missing_future_outcomes')})"
+      - name: Show realized-outcome research and collection lag
+        run: |
+          python -c "import json; r=json.load(open('reports/trend-learning.json')); s=r['rss_observations']; print({k:s[k] for k in ('topic_count','growth_observed','insufficient_observations','collection_freshness','collection_lag_hours')})"
       - name: Show discovery queue and failed sources
         run: |
           python -c "import json; a=json.load(open('reports/event-candidates.json')); print({k:a[k] for k in ('status','sources_ok','sources_total','queued')}); print(a['sources'])"
