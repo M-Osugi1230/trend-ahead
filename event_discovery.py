@@ -702,24 +702,50 @@ def extract_tcg_product_list(html: str, source: dict, now: datetime):
     return found
 
 
+TCG_TYPES = ("プレミアムブースター", "トライアルデッキ",
+             "エクストラブースター", "ブースターパック")
+
+
+def _tcg_product_key(title):
+    value = normalize(title)
+    value = re.sub(r"^(ヴァイスシュヴァルツ|weissschwarz)", "", value)
+    value = re.sub(r"(発売予定|発売)$", "", value)
+    product_type = next((kind for kind in TCG_TYPES if normalize(kind) in value), None)
+    for kind in TCG_TYPES:
+        value = value.replace(normalize(kind), "", 1)
+    return value, product_type
+
+
 def match_curated(candidate: dict, curated: list):
+    """Same-day duplicate checks: preserve uncertainty for renamed releases."""
     match_title = normalize(candidate["title"])
     candidate_is_movie = candidate.get("event_type") == "movie_release"
+    candidate_is_tcg = candidate.get("event_type") == "tcg_release"
     film_key = _movie_title_key(candidate["title"]) if candidate_is_movie else ""
+    product_key, product_type = (
+        _tcg_product_key(candidate["title"]) if candidate_is_tcg else ("", None)
+    )
     for row in curated:
         official_title = normalize(str(row.get("title", "")))
         official_date = parse_date(str(row.get("starts_at", "")))
-        if official_date and official_date.isoformat() == candidate["starts_at"]:
-            if match_title == official_title:
-                return "exact_curated"
-            if (candidate_is_movie and row.get("category") == "映画・アニメ"
-                    and len(film_key) >= 3 and film_key == _movie_title_key(row.get("title", ""))):
-                return "exact_curated"
-            if len(match_title) >= 3 and len(official_title) >= 5:
-                if match_title in official_title or official_title in match_title:
-                    return "possible_curated"
+        if not official_date or official_date.isoformat() != candidate["starts_at"]:
+            continue
+        if match_title == official_title:
+            return "exact_curated"
+        if (candidate_is_movie and row.get("category") == "映画・アニメ"
+                and len(film_key) >= 3 and film_key == _movie_title_key(row.get("title", ""))):
+            return "exact_curated"
+        if candidate_is_tcg and row.get("category") == "グルメ・商品":
+            curated_key, curated_type = _tcg_product_key(str(row.get("title", "")))
+            if len(product_key) >= 5 and product_key == curated_key:
+                if curated_type and product_type == curated_type:
+                    return "exact_curated"
+                # A release with unspecified package type may be a distinct SKU.
+                return "possible_curated"
+        if len(match_title) >= 3 and len(official_title) >= 5:
+            if match_title in official_title or official_title in match_title:
+                return "possible_curated"
     return None
-
 
 def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official_page):
     if now.tzinfo is None:
@@ -785,27 +811,63 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
 
 
 def review_markdown(report):
+    """Put near-term genuinely new leads first, possible duplicates last."""
+    try:
+        now = datetime.fromisoformat(report["generated_at"]).astimezone(JST).date()
+    except (ValueError, TypeError, KeyError):
+        now = datetime.now(JST).date()
+    candidates = report.get("candidates", [])
+    urgent, later, duplicates = [], [], []
+    for item in candidates:
+        if item.get("match_curated") == "possible_curated":
+            duplicates.append(item)
+            continue
+        try:
+            due = date.fromisoformat(item["starts_at"])
+        except (TypeError, ValueError, KeyError):
+            later.append(item)
+            continue
+        if due <= now + timedelta(days=14):
+            urgent.append(item)
+        else:
+            later.append(item)
+    urgent.sort(key=lambda x: (x["starts_at"], x["source_id"]))
+    later.sort(key=lambda x: (x["starts_at"], x["source_id"]))
+    duplicates.sort(key=lambda x: (x["starts_at"], x["source_id"]))
     lines = [
-        "# 公式イベント候補・編集審査キュー",
-        "",
+        "# 公式イベント候補・編集審査キュー", "",
         "これらの候補は**未確認・未公開**。公式ページを開いて名称・日付・時刻・"
         "中止・主催者・ジャンル・重複をチェックするまで公開データに追加しない。",
         "",
         f"生成：{report['generated_at']} ／ 候補 {report['queued']}件"
         f" ／ 情報源成功 {report['sources_ok']}/{report['sources_total']}",
-        "",
+        f"優先審査：{len(urgent)}件（14日以内）"
+        f" ／ 後日審査：{len(later)}件"
+        f" ／ 重複疑い：{len(duplicates)}件", "",
     ]
-    for item in report["candidates"]:
-        lines.extend([
-            f"- [ ] {item['starts_at']}｜{item['title']}（{item['category']}）",
-            f"  - 出典：{item['official_url']}",
-            f"  - 抽出根拠：{item['evidence']} ／ ID: {item['candidate_id']}",
-            f"  - 既存掲載との重複疑い：{item['match_curated'] or '不明・要確認'}",
-            "  - 確認後にのみ、正確な個別主催者URLとverified_atを付与",
-        ])
-    if not report["candidates"]:
-        lines.append("今回の候補は0件です。情報源の到達状況・抽出件数を下記で確認。")
-    lines.extend(["", "## 情報源の状態", ""])
+    def section(title, items):
+        lines.extend(["## " + title, ""])
+        if not items:
+            lines.extend(["候補なし", ""])
+            return
+        for item in items:
+            lines.extend([
+                f"- [ ] {item['starts_at']}｜{item['title']}（{item['category']}）",
+                f"  - 出典：{item['official_url']}",
+                f"  - 抽出根拠：{item['evidence']} ／ ID: {item['candidate_id']}",
+                f"  - 重複判定：{item.get('match_curated') or '未検出'}",
+            ])
+            if item.get("review_reference_url"):
+                lines.append("  - 追加の参照候補（公式性と日付は要確認）："
+                             + item["review_reference_url"])
+            if item.get("date_claim") == "calendar_metadata_unverified":
+                lines.append("  - **注意：公式カレンダー上の日付で、実際の発売日とは限りません**")
+            lines.append("  - 編集者は主催者・メーカーの個別ページを開き確認")
+        lines.append("")
+    section("今後14日間・優先確認", urgent)
+    section("14日より先・確認待ち", later)
+    section("既存掲載との重複疑い・再登録しない", duplicates)
+    lines.extend(["## 情報源の状態", ""])
     for row in report["sources"]:
         lines.append(f"- {row['source_id']}: {row['status']}"
                      f"／抽出 {row.get('extracted', '?')}件"
@@ -813,7 +875,6 @@ def review_markdown(report):
                      + (f"／{row['reason']}" if row.get("reason") else ""))
     lines.append("")
     return "\n".join(lines)
-
 
 def main():
     parser = argparse.ArgumentParser(description="Generate editorial-only event discovery queue")
