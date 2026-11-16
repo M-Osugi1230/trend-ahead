@@ -398,6 +398,56 @@ class DiscoveryTests(unittest.TestCase):
         html = "<ul><li>2026年12月1日　新商品のお知らせ ブースターパック</li></ul>"
         self.assertEqual(extract_tcg_product_list(html, source, NOW), [])
 
+    def test_tcg_release_has_probable_duplicate_not_false_exact(self):
+        item = {
+            "title": "ブースターパック Persona 30th Anniversary 発売",
+            "starts_at": "2026-11-27", "category": "グルメ・商品",
+            "event_type": "tcg_release",
+        }
+        curated = [{
+            "title": "ヴァイスシュヴァルツ『Persona 30th Anniversary』発売",
+            "starts_at": "2026-11-27", "category": "グルメ・商品",
+        }]
+        self.assertEqual(match_curated(item, curated), "possible_curated")
+        curated[0]["title"] = "ヴァイスシュヴァルツ ブースターパック Persona 30th Anniversary 発売"
+        self.assertEqual(match_curated(item, curated), "exact_curated")
+        other = dict(item, starts_at="2026-11-28")
+        self.assertIsNone(match_curated(other, curated))
+
+    def test_review_pack_puts_near_term_first_and_marks_product_dates(self):
+        base = {
+            "source_id": "sample_official", "category": "グルメ・商品",
+            "official_url": "https://example.org/official",
+            "evidence": "掲載日：2026年11月20日",
+            "status": "needs_review",
+        }
+        report = {
+            "generated_at": NOW.isoformat(),
+            "sources_total": 1, "sources_ok": 1, "queued": 3,
+            "sources": [{"source_id": "sample_official", "status": "ok",
+                         "extracted": 3, "queued": 3}],
+            "candidates": [
+                dict(base, candidate_id="later", starts_at="2027-01-12",
+                     title="ずっと先の発売", match_curated=None),
+                dict(base, candidate_id="urgent", starts_at="2026-11-20",
+                     title="発売日が未確定のグッズ", match_curated=None,
+                     date_claim="calendar_metadata_unverified",
+                     review_reference_url="https://example.org/product"),
+                dict(base, candidate_id="duplicate", starts_at="2026-11-21",
+                     title="重複の可能性がある商品", match_curated="possible_curated"),
+            ],
+        }
+        markdown = review_markdown(report)
+        self.assertIn("優先審査：1件", markdown)
+        self.assertIn("後日審査：1件", markdown)
+        self.assertIn("重複疑い：1件", markdown)
+        self.assertLess(markdown.index("発売日が未確定のグッズ"),
+                        markdown.index("ずっと先の発売"))
+        self.assertLess(markdown.index("ずっと先の発売"),
+                        markdown.index("重複の可能性がある商品"))
+        self.assertIn("実際の発売日とは限りません", markdown)
+        self.assertIn("未確認・未公開", markdown)
+
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
 
