@@ -259,6 +259,27 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(rows[0]["event_type"], "concert")
         self.assertNotIn("verified_at", rows[0])
 
+    def test_movie_release_dedupe_ignores_display_wrappers(self):
+        candidate = {
+            "title": "魔法使いの夜", "starts_at": "2026-11-20",
+            "event_type": "movie_release", "category": "映画・アニメ",
+        }
+        curated = [{
+            "title": "映画『魔法使いの夜』公開",
+            "starts_at": "2026-11-20", "category": "映画・アニメ",
+        }]
+        self.assertEqual(match_curated(candidate, curated), "exact_curated")
+        self.assertIsNone(match_curated(
+            dict(candidate, starts_at="2026-11-21"), curated
+        ))
+        self.assertEqual(match_curated({
+            "title": "君の話", "starts_at": "2026-11-27",
+            "event_type": "movie_release",
+        }, [{
+            "title": "映画『君の話』公開", "starts_at": "2026-11-27",
+            "category": "映画・アニメ"
+        }]), "exact_curated")
+
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
 
