@@ -380,6 +380,35 @@ def extract_arena_month_day(html: str, source: dict, now: datetime):
     return found
 
 
+
+def extract_game_title_date(html: str, source: dict, now: datetime):
+    """Nintendo-style visible product row with title, full date and publisher.
+
+    Only full dates are accepted. JavaScript-only catalogs are reported as
+    no parseable candidates, never as verified releases.
+    """
+    parser = ListItemExtractor()
+    parser.feed(html)
+    rows, seen = [], set()
+    for item in parser.items:
+        match = JP_DATE.search(item)
+        if not match:
+            continue
+        title = re.sub(r"\s+", " ", item[:match.start()]).strip(" \t・-：")
+        title = re.sub(
+            r"^(?:今後発売予定のソフト|Nintendo Switch 2 ソフト)\s*", "", title
+        )
+        if not 6 <= len(title) <= 120 or "発売中のソフト" in title or "公開中" in title:
+            continue
+        candidate = candidate_from_heading(title + " 発売", match.group(0), source, now)
+        if candidate and candidate["candidate_id"] not in seen:
+            candidate["event_type"] = "game_release"
+            seen.add(candidate["candidate_id"])
+            rows.append(candidate)
+        if len(rows) >= source.get("max_candidates", 25):
+            break
+    return rows
+
 def match_curated(candidate: dict, curated: list):
     # Only exact same normalized titles/dates can be confidently de-duplicated.
     match_title = normalize(candidate["title"])
@@ -406,7 +435,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
@@ -419,6 +448,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 "movie_title_date": extract_movie_title_date,
                 "movie_date_title": extract_movie_date_title,
                 "arena_month_day": extract_arena_month_day,
+                "game_title_date": extract_game_title_date,
             }[source["kind"]]
             rows = extractor(html, source, now)
             added = 0
