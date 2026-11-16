@@ -580,6 +580,7 @@ def homepage(rows, upcoming, now, site_url, health, indexing_enabled=False, sign
 <div class="front-layout"><div class="front-main">
 <p id="future-result-status" class="future-result-status" role="status" aria-live="polite">{len(upcoming)}件</p>
 <div id="future-list" class="front-event-list">{future}</div>
+<button id="future-load-more" type="button" class="future-load-more" hidden>さらに表示 ＋</button>
 <p id="future-empty" class="empty" hidden>該当する予定はありません。</p>
 <div class="front-bottom-links"><a href="/week/">今週の予定 →</a>
 <a href="/calendar/upcoming.ics" download>カレンダーに追加 →</a><a href="/subscribe/">ジャンル別に購読 →</a>
