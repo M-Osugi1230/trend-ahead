@@ -349,7 +349,7 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(item["date_claim"], "calendar_metadata_unverified")
         self.assertEqual(item["status"], "needs_review")
         self.assertNotIn("verified_at", item)
-        self.assertIn("発売日とは限らない", item["notes"])
+        self.assertIn("発売日・応募締切・開始時刻とは限らない", item["notes"])
         self.assertEqual(item["official_url"], source["url"])
 
         report = discover([source], [], NOW, lambda _: json.dumps(payload, ensure_ascii=False))
