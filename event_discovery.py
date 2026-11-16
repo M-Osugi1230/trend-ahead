@@ -716,6 +716,48 @@ def _tcg_product_key(title):
     return value, product_type
 
 
+
+YUGIOH_PRODUCT_ITEM = re.compile(
+    r"(?:基本パック|構築済みデッキ|コンセプトパック|スペシャルパック|"
+    r"スペシャルセット|デュエリストアイテム)\s+"
+    r"(?P<title>.{5,140}?)\s+"
+    r"(?P<release>20\d{2}年\s*\d{1,2}月\s*\d{1,2}日)"
+)
+
+
+def extract_yugioh_products(html: str, source: dict, now: datetime):
+    """Stage Konami's exact product dates; skip products with month-only dates.
+
+    A date within the official product list is review evidence only. Especially
+    limited editions might not be available to general retail customers.
+    """
+    parser = ListItemExtractor()
+    parser.feed(html)
+    found, seen = [], set()
+    for entry in parser.items:
+        match = YUGIOH_PRODUCT_ITEM.search(entry)
+        if not match:
+            continue
+        title = re.sub(r"\s+", " ", match["title"]).strip()
+        if not 5 <= len(title) <= 130:
+            continue
+        candidate = candidate_from_heading(title + " 発売", match["release"], source, now)
+        if not candidate or candidate["candidate_id"] in seen:
+            continue
+        candidate["event_type"] = "tcg_release"
+        candidate["notes"] = (
+            "遊戯王OCG公式商品情報の発売日。限定販売・取扱店舗・"
+            "延期・重複を個別確認してから掲載"
+        )
+        if "限定" in entry[:match.start()]:
+            candidate["availability_hint"] = "limited_distribution_review_required"
+        seen.add(candidate["candidate_id"])
+        found.append(candidate)
+        if len(found) >= source.get("max_candidates", 25):
+            break
+    return found
+
+
 def match_curated(candidate: dict, curated: list):
     """Same-day duplicate checks: preserve uncertainty for renamed releases."""
     match_title = normalize(candidate["title"])
@@ -759,7 +801,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json", "tcg_product_list")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule", "pokemon_goods_json", "tcg_product_list", "yugioh_products")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
@@ -778,6 +820,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 "zepp_schedule": extract_zepp_schedule,
                 "pokemon_goods_json": extract_pokemon_goods_json,
                 "tcg_product_list": extract_tcg_product_list,
+                "yugioh_products": extract_yugioh_products,
             }[source["kind"]]
             rows = extractor(html, source, now)
             added = 0
