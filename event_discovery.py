@@ -496,6 +496,77 @@ def extract_jra_g1_dates(html: str, source: dict, now: datetime):
             break
     return found
 
+
+K_ARENA_DATE = re.compile(
+    r"^(?P<year>20\d{2})\.(?P<month>0?[1-9]|1[0-2])\."
+    r"(?P<day>0?[1-9]|[12]\d|3[01])\.\s*"
+    r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\.?\s*(?P<title>.+)$",
+    re.IGNORECASE,
+)
+ZEPP_DATE = re.compile(
+    r"(?<!\d)(?P<year>20\d{2})\s+(?P<month>0?[1-9]|1[0-2])\."
+    r"(?P<day>0?[1-9]|[12]\d|3[01])\s+"
+    r"(?:MON|TUE|WED|THU|FRI|SAT|SUN)\s+(?P<title>.+?)"
+    r"(?=\s+\[OPEN\]|\s+\[START\])",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _full_date_candidate(source, now, year, month, day, title):
+    """No inferred time; a review candidate is all-day until independently checked."""
+    title = re.sub(r"\s+", " ", title).strip()
+    title = re.sub(r"^取扱公演\s*", "", title)
+    title = re.sub(r"\s*(?:OPEN|START)\s+\d{1,2}:\d{2}.*$", "", title)
+    if not 7 <= len(title) <= 150 or title.upper() == "PRIVATE":
+        return None
+    try:
+        start = date(int(year), int(month), int(day))
+    except ValueError:
+        return None
+    return candidate_from_heading(title, start.isoformat(), source, now)
+
+
+def extract_k_arena_dates(html: str, source: dict, now: datetime):
+    """K-Arena Yokohama listings: YYYY.MM.DD.Day. title OPEN..."""
+    parser = ListItemExtractor()
+    parser.feed(html)
+    found, seen = [], set()
+    for item in parser.items:
+        match = K_ARENA_DATE.match(item)
+        if not match:
+            continue
+        candidate = _full_date_candidate(source, now, match["year"],
+                                         match["month"], match["day"], match["title"])
+        if candidate and candidate["candidate_id"] not in seen:
+            candidate["event_type"] = "concert"
+            found.append(candidate)
+            seen.add(candidate["candidate_id"])
+        if len(found) >= source.get("max_candidates", 30):
+            break
+    return found
+
+
+def extract_zepp_schedule(html: str, source: dict, now: datetime):
+    """Zepp official daily schedule. Do not treat [OPEN] as [START]."""
+    parser = HeadingTextExtractor()
+    parser.feed(html)
+    text = re.sub(r"\s+", " ", " ".join(value for _, value in parser.blocks))
+    found, seen = [], set()
+    for match in ZEPP_DATE.finditer(text):
+        title = match["title"].strip()
+        if len(title) > 150:
+            continue  # long performer list needs human review of the source instead
+        candidate = _full_date_candidate(source, now, match["year"],
+                                         match["month"], match["day"], title)
+        if candidate and candidate["candidate_id"] not in seen:
+            candidate["event_type"] = "concert"
+            found.append(candidate)
+            seen.add(candidate["candidate_id"])
+        if len(found) >= source.get("max_candidates", 35):
+            break
+    return found
+
+
 def match_curated(candidate: dict, curated: list):
     # Only exact same normalized titles/dates can be confidently de-duplicated.
     match_title = normalize(candidate["title"])
@@ -522,7 +593,7 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
         url = str(source.get("url", ""))
         hostname = urlsplit(url).hostname
         if (not hostname or not allowed_https_url(url, hostname)
-                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table")
+                or source.get("kind") not in ("heading_dates", "date_then_title", "movie_title_date", "movie_date_title", "arena_month_day", "game_title_date", "jra_g1_table", "k_arena_dates", "zepp_schedule")
                 or source.get("category") is None
                 or not re.fullmatch(r"[a-z0-9_-]{3,48}", source_id)):
             results.append({"source_id": source_id, "status": "invalid_config"})
@@ -537,6 +608,8 @@ def discover(sources: list, curated: list, now: datetime, fetcher=fetch_official
                 "arena_month_day": extract_arena_month_day,
                 "game_title_date": extract_game_title_date,
                 "jra_g1_table": extract_jra_g1_dates,
+                "k_arena_dates": extract_k_arena_dates,
+                "zepp_schedule": extract_zepp_schedule,
             }[source["kind"]]
             rows = extractor(html, source, now)
             added = 0
