@@ -7,6 +7,7 @@ from pathlib import Path
 from event_discovery import (
     allowed_https_url, candidate_from_heading, discover, extract_heading_dates,
     match_curated, normalize, review_markdown, extract_date_title_rows,
+    extract_game_title_date,
     extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
 )
 
@@ -182,6 +183,25 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(report["queued"], 2)
         self.assertTrue(all(x["status"] == "needs_review" for x in report["candidates"]))
         self.assertTrue(all("verified_at" not in x for x in report["candidates"]))
+
+    def test_nintendo_upcoming_game_release_dates_are_not_auto_approved(self):
+        source = {
+            "id": "nintendo_switch2",
+            "url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html?category=edition",
+            "category": "ゲーム", "kind": "game_title_date", "max_candidates": 20,
+        }
+        html = """<main><ul><li>ピクミン4 Nintendo Switch 2 Edition 2026.11.12（木） 任天堂</li>
+        <li>ゼノブレイド3 Nintendo Switch 2 Edition 2026.12.3（木） 任天堂</li>
+        <li>メトロイド ラヴェナス 2027.1.28（木） 任天堂</li>
+        <li>新作 未定 2027年春 発売予定</li>
+        </ul></main>"""
+        rows = extract_game_title_date(html, source, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["starts_at"], "2026-12-03")
+        self.assertEqual(rows[1]["starts_at"], "2027-01-28")
+        self.assertEqual(rows[0]["event_type"], "game_release")
+        self.assertTrue(all(row["status"] == "needs_review" for row in rows))
+        self.assertTrue(all("verified_at" not in row for row in rows))
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
