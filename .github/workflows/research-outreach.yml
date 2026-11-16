@@ -6,6 +6,8 @@ on:
     paths:
       - 'backtest.py'
       - 'trend_learning.py'
+      - 'forecast_ledger.py'
+      - 'collection_health.py'
       - 'data/verified_trend_cases_2025.json'
       - 'outreach.py'
       - 'event_audit.py'
@@ -38,6 +40,10 @@ jobs:
         run: python backtest.py --output reports/backtest.json
       - name: Audit actual historic trend outcomes and collected RSS growth
         run: python trend_learning.py --json-output reports/trend-learning.json --markdown-output reports/trend-learning.md
+      - name: Evaluate issued forecasts without future data leakage
+        run: python forecast_ledger.py evaluate --data-dir data --output reports/forecast-evaluation.json
+      - name: Check actual RSS collection schedule and rate limits
+        run: python collection_health.py --data-dir data --output reports/collection-health.json
       - name: Restore prior official-event observation snapshot
         uses: actions/cache/restore@v4
         with:
@@ -71,6 +77,10 @@ jobs:
       - name: Show realized-outcome research and collection lag
         run: |
           python -c "import json; r=json.load(open('reports/trend-learning.json')); s=r['rss_observations']; print({k:s[k] for k in ('topic_count','growth_observed','insufficient_observations','collection_freshness','collection_lag_hours')})"
+      - name: Show prospective forecast evaluation and ingest reliability
+        run: |
+          python -c "import json; r=json.load(open('reports/forecast-evaluation.json')); print({k:r[k] for k in ('status','issued_forecasts','mature_labeled','pending','missing_future')})"
+          python -c "import json; r=json.load(open('reports/collection-health.json')); print({k:r[k] for k in ('status','observed_run_records_24h','minutes_since_last_run','runs_with_429_24h')})"
       - name: Show discovery queue and failed sources
         run: |
           python -c "import json; a=json.load(open('reports/event-candidates.json')); print({k:a[k] for k in ('status','sources_ok','sources_total','queued')}); print(a['sources'])"
