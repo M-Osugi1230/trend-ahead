@@ -92,37 +92,55 @@
   }
 
   // Filter upcoming events in-place without a server round-trip.
+  // Keep the opening screen scannable even as the verified catalog grows.
+  // All cards remain in the static HTML and are visible without JavaScript.
   const futureCards = [...document.querySelectorAll('#future-list .upcoming-card')];
   const futureSearch = $('future-search');
   const futureCategory = $('future-category');
   const futureRangeButtons = [...document.querySelectorAll('[data-future-window]')];
+  const futureMore = $('future-load-more');
+  const PAGE_SIZE = 12;
   let futureWindow = 'all';
+  let futureLimit = PAGE_SIZE;
 
   function filterFuture() {
     const query = (futureSearch?.value || '').trim().toLocaleLowerCase();
     const selected = futureCategory?.value || 'all';
     const now = Date.now();
     const horizon = futureWindow === 'all' ? Infinity : Number(futureWindow) * 86400000;
-    let visible = 0;
+    let matched = 0;
+    let shown = 0;
     for (const card of futureCards) {
       const start = Date.parse(card.dataset.startsAt || '');
       const matchesDate = futureWindow === 'all' ||
         (Number.isFinite(start) && start >= now && start - now <= horizon);
       const matchesCategory = selected === 'all' || card.dataset.category === selected;
       const matchesSearch = !query || (card.dataset.search || '').includes(query);
-      const show = matchesDate && matchesCategory && matchesSearch;
+      const matches = matchesDate && matchesCategory && matchesSearch;
+      if (matches) matched++;
+      const show = matches && matched <= futureLimit;
       card.hidden = !show;
-      if (show) visible++;
+      if (show) shown++;
     }
     const status = $('future-result-status');
-    if (status) status.textContent = String(visible) + '件の予定を表示' +
-      (futureWindow === 'all' ? '' : '（' + futureWindow + '日以内）');
+    if (status) status.textContent = matched === shown
+      ? String(matched) + '件'
+      : String(matched) + '件中 ' + String(shown) + '件を表示';
     const empty = $('future-empty');
-    if (empty) empty.hidden = !(futureCards.length && visible === 0);
+    if (empty) empty.hidden = !(futureCards.length && matched === 0);
+    if (futureMore) {
+      futureMore.hidden = shown >= matched;
+      futureMore.textContent = 'さらに表示（残り' + (matched - shown) + '件） ＋';
+    }
   }
 
+  futureMore?.addEventListener('click', () => {
+    futureLimit += PAGE_SIZE;
+    filterFuture();
+  });
   futureRangeButtons.forEach(button => button.addEventListener('click', () => {
     futureWindow = button.dataset.futureWindow || 'all';
+    futureLimit = PAGE_SIZE;
     for (const option of futureRangeButtons) {
       const active = option === button;
       option.classList.toggle('is-active', active);
@@ -130,8 +148,14 @@
     }
     filterFuture();
   }));
-  futureSearch?.addEventListener('input', filterFuture);
-  futureCategory?.addEventListener('change', filterFuture);
+  futureSearch?.addEventListener('input', () => {
+    futureLimit = PAGE_SIZE;
+    filterFuture();
+  });
+  futureCategory?.addEventListener('change', () => {
+    futureLimit = PAGE_SIZE;
+    filterFuture();
+  });
 
   document.addEventListener('click', async ev => {
     const button = ev.target.closest('[data-save]');
