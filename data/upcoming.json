@@ -360,6 +360,22 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "ポケモンカード拡張パック『ハドウシーカー』発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-11-27",
+    "description": "ポケモンカードゲーム公式サイト掲載の発売日。店舗ごとの入荷・購入可否は別途確認。",
+    "official_url": "https://www.pokemon-card.com/ex/m7/",
+    "verified_at": "2026-11-17T00:03:00+09:00"
+  },
+  {
+    "title": "ポケモン ALL STAR COLLECTION新作ぬいぐるみ発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-11-27",
+    "description": "ポケモン公式掲載。三英貿易のぬいぐるみ・マスコット新商品。販売店舗・在庫は販売元で確認。",
+    "official_url": "https://www.pokemon.co.jp/goods/2026/11/261113_to01.html",
+    "verified_at": "2026-11-17T00:03:00+09:00"
+  },
+  {
     "title": "ポルカドットスティングレイ STILL PINK TOUR Zepp Shinjuku",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-27T18:30:00+09:00",
@@ -390,6 +406,14 @@
     "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
     "official_url": "https://pia-arena-mm.jp/event/index.html",
     "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "『カードファイト!! ヴァンガード』15周年リマスター放送再開",
+    "category": "映画・アニメ",
+    "starts_at": "2026-11-28T08:00:00+09:00",
+    "description": "テレビ東京のアニメ放送決定一覧で11月28日（土）朝8時の放送再開を案内。",
+    "official_url": "https://www.tv-tokyo.co.jp/anime/animetable/new_anime_list.html",
+    "verified_at": "2026-11-17T00:03:00+09:00"
   },
   {
     "title": "あんスタ THE STAGE 10周年衣裳展 前期開幕",
@@ -664,6 +688,14 @@
     "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
+    "title": "TVアニメ『BanG Dream! MyGO!!!!! // Ave Mujica』放送開始",
+    "category": "映画・アニメ",
+    "starts_at": "2027-01-08T23:30:00+09:00",
+    "description": "作品公式サイトの放送予定。日本テレビ系列で23:30開始予定、編成により変更の可能性あり。",
+    "official_url": "https://anime.bang-dream.com/mygo-avemujica/onair/",
+    "verified_at": "2026-11-17T00:03:00+09:00"
+  },
+  {
     "title": "劇場版『虎に翼』公開",
     "category": "映画・アニメ",
     "starts_at": "2027-01-15",
@@ -686,6 +718,14 @@
     "official_url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html?category=edition",
     "description": "任天堂のNintendo Switch 2発売予定一覧に掲載。開始時刻は未公表。",
     "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "『メトロイド ラヴェナス』Nintendo Switch 2発売",
+    "category": "ゲーム",
+    "starts_at": "2027-01-28",
+    "description": "任天堂公式のNintendo Switch 2発売スケジュールで公表された発売予定日。発売時刻は未発表。",
+    "official_url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html?category=edition",
+    "verified_at": "2026-11-17T00:03:00+09:00"
   },
   {
     "title": "映画『カイジ 人生リベンジゲーム』公開",
