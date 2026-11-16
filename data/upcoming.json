@@ -96,6 +96,22 @@
     "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
+    "title": "遊戯王OCG『REVOLUTION BOOSTER 方界・マリンセス・ゴーストリック』発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-11-21",
+    "description": "遊戯王OCG公式の発売日。店舗在庫・購入可否は各店舗で確認。",
+    "official_url": "https://www.yugioh-card.com/japan/products/rv02/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
+    "title": "『遊☆戯☆王の日』11月開催開始",
+    "category": "ゲーム",
+    "starts_at": "2026-11-21",
+    "description": "全国のオフィシャルトーナメントストアで11月21〜23日に開催。商品購入など参加条件あり。",
+    "official_url": "https://www.yugioh-card.com/japan/event/yugioh_day/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
     "title": "『可愛いだけじゃない！？ピングー展』福岡開幕",
     "category": "映画・アニメ",
     "description": "福岡市科学館で開催。会期は2027年1月11日まで。",
@@ -376,6 +392,14 @@
     "verified_at": "2026-11-17T00:03:00+09:00"
   },
   {
+    "title": "ヴァイスシュヴァルツ『Persona 30th Anniversary』発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-11-27",
+    "description": "ブースターパックの公式発売日。",
+    "official_url": "https://ws-tcg.com/products/p30_wsbp/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
     "title": "ポルカドットスティングレイ STILL PINK TOUR Zepp Shinjuku",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-27T18:30:00+09:00",
@@ -544,6 +568,22 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "ヴァイスシュヴァルツ『魔法少女ノ魔女裁判』トライアルデッキ発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-12-11",
+    "description": "ヴァイスシュヴァルツ公式のトライアルデッキ発売日。",
+    "official_url": "https://ws-tcg.com/products/mjs_td_ws/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
+    "title": "ONE PIECEカードゲーム BASE SHOPリミテッドカードコレクションvol.2発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-12-11",
+    "description": "ONE PIECE BASE SHOPでの先行販売予定。一般店舗での販売日とは限りません。",
+    "official_url": "https://one-piece.com/news/83105/index.html",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
     "title": "The Game Awards 2026 生配信オープニング",
     "category": "ゲーム",
     "description": "米東部時間12月10日19:30からオープニング。日本時間12月11日9:30に相当します。受賞発表やゲーム新情報に注目。",
@@ -600,6 +640,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "ヴァイスシュヴァルツ『超かぐや姫！』プレミアムブースター発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-12-18",
+    "description": "ヴァイスシュヴァルツ公式のプレミアムブースター発売日。",
+    "official_url": "https://ws-tcg.com/products/cpk_pb/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
     "title": "ジャンプフェスタ2027 DAY1",
     "category": "映画・アニメ",
     "description": "幕張メッセ。入場無料、事前応募・招待制。入場チケット要。",
@@ -638,6 +686,14 @@
     "description": "ワーナー・ブラザース公式に掲載された劇場公開予定日。",
     "official_url": "https://www.warnerbros.co.jp/movie/",
     "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "ヴァイスシュヴァルツ『アズールレーン Vol.3』発売",
+    "category": "グルメ・商品",
+    "starts_at": "2026-12-25",
+    "description": "ヴァイスシュヴァルツ公式商品一覧に掲載されたブースターパック発売日。",
+    "official_url": "https://ws-tcg.com/products/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
   },
   {
     "title": "中山大障害（J・GⅠ）",
@@ -704,12 +760,28 @@
     "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
+    "title": "ヴァイスシュヴァルツ『新日本プロレス×AEW Forbidden Door』ブースターパック発売",
+    "category": "グルメ・商品",
+    "starts_at": "2027-01-15",
+    "description": "ヴァイスシュヴァルツ公式商品一覧の発売予定日。",
+    "official_url": "https://ws-tcg.com/products/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
     "title": "劇場版『40までにしたい10のこと』公開",
     "category": "映画・アニメ",
     "starts_at": "2027-01-22",
     "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
     "official_url": "https://www.toho.co.jp/movie/lineup/",
     "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "ヴァイスシュヴァルツ『お兄ちゃんはおしまい！』プレミアムブースター発売",
+    "category": "グルメ・商品",
+    "starts_at": "2027-01-22",
+    "description": "ヴァイスシュヴァルツ公式のプレミアムブースター発売日。",
+    "official_url": "https://ws-tcg.com/products/ono_pb/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
   },
   {
     "title": "『メトロイド ラヴェナス』発売",
@@ -734,6 +806,14 @@
     "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
     "official_url": "https://www.toho.co.jp/movie/lineup/",
     "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "ヴァイスシュヴァルツ『魔法少女リリカルなのは EXCEEDS Gun Blaze Vengeance』発売",
+    "category": "グルメ・商品",
+    "starts_at": "2027-01-29",
+    "description": "ヴァイスシュヴァルツ公式のブースターパック発売日。",
+    "official_url": "https://ws-tcg.com/products/ngb_bp/",
+    "verified_at": "2026-11-17T00:04:00+09:00"
   },
   {
     "title": "映画『フラガール 4K』公開",
