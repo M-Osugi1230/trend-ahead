@@ -7,6 +7,8 @@ on:
       - "outreach.py"
       - "event_audit.py"
       - "event_discovery.py"
+      - "youtube_upcoming.py"
+      - "data/youtube_channels.json"
       - "review_apply.py"
       - "data/event_sources.json"
       - ".github/workflows/research-outreach.yml"
