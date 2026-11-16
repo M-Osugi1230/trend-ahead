@@ -8,6 +8,8 @@ on:
       - 'outreach.py'
       - 'event_audit.py'
       - 'event_discovery.py'
+      - 'youtube_upcoming.py'
+      - 'data/youtube_channels.json'
       - 'data/event_sources.json'
       - 'data/upcoming.json'
       - '.github/workflows/research-outreach.yml'
@@ -31,6 +33,10 @@ jobs:
         run: python backtest.py --output reports/backtest.json
       - name: Discover official events for editorial review only
         run: python event_discovery.py --json-output reports/event-candidates.json --review-output reports/event-review.md
+      - name: Discover approved-channel YouTube livestreams (opt-in only)
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python youtube_upcoming.py --channels data/youtube_channels.json --output reports/youtube-candidates.json --review-output reports/youtube-review.md
       - name: Review event catalog freshness and coverage
         run: python event_audit.py --output reports/event-audit.json
       - name: Create review-only Japanese outreach drafts
