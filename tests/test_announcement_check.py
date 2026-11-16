@@ -32,7 +32,7 @@ class MonthCheckTest(unittest.TestCase):
         result = check(ITEMS, NOW, lambda url: "<p>2027年2月放送予定</p>")
         self.assertEqual(result["status"], "review_required")
         self.assertEqual(result["items"][0]["status"], "different_month_visible_review")
-        self.assertNotIn("verified_at", result["items"][0])
+        self.assertEqual(result["items"][0]["verified_at"], ITEMS[0]["verified_at"])
         self.assertIn("中止・変更確定の判定ではなく", markdown(result))
 
     def test_unreadable_or_absent_is_not_cancellation(self):
