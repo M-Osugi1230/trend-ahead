@@ -8,6 +8,7 @@ on:
       - 'outreach.py'
       - 'event_audit.py'
       - 'event_discovery.py'
+      - 'event_change_monitor.py'
       - 'youtube_upcoming.py'
       - 'data/youtube_channels.json'
       - 'data/event_sources.json'
@@ -31,8 +32,23 @@ jobs:
           python-version: "3.12"
       - name: Research-only retrospective evaluation
         run: python backtest.py --output reports/backtest.json
+      - name: Restore prior official-event observation snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: reports/event-snapshot.json
+          key: event-monitor-v1-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            event-monitor-v1-${{ github.ref_name }}-
       - name: Discover official events for editorial review only
         run: python event_discovery.py --json-output reports/event-candidates.json --review-output reports/event-review.md
+      - name: Compare calendar listings without assuming cancellations
+        run: |
+          python event_change_monitor.py --current reports/event-candidates.json --previous reports/event-snapshot.json --snapshot-out reports/event-snapshot.json --report-out reports/event-changes.json --review-out reports/event-changes.md
+      - name: Save official-event observation snapshot for next run
+        uses: actions/cache/save@v4
+        with:
+          path: reports/event-snapshot.json
+          key: event-monitor-v1-${{ github.ref_name }}-${{ github.run_id }}
       - name: Discover approved-channel YouTube livestreams (opt-in only)
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
