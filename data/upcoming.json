@@ -24,12 +24,28 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "YOGEE NEW WAVES『Dreamin’ Night 8』",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-18T19:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。ゲストは踊ってばかりの国。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "TOMOO Arena Tour 2026 ぴあアリーナMM公演 DAY2",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-19",
     "description": "ぴあアリーナMM公式開催スケジュール掲載。開演時刻・チケット状況は公式案内で確認。",
     "official_url": "https://pia-arena-mm.jp/event/index.html",
     "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "BRANDY SENKI TOUR 2026 東京公演",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-19T19:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。チケット・入場は公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "映画『魔法使いの夜』公開",
@@ -48,6 +64,22 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "J1 鹿島アントラーズ vs 清水エスパルス",
+    "category": "スポーツ",
+    "starts_at": "2026-11-20T19:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。鹿島主催のリーグ戦。放送・チケットは公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "J1 柏レイソル vs ジェフユナイテッド千葉",
+    "category": "スポーツ",
+    "starts_at": "2026-11-20T19:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。柏主催の千葉県勢対決。放送・チケットは公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "M!LK ARENA TOUR 2026-2027 ぴあアリーナMM公演 DAY1",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-21",
@@ -64,12 +96,52 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "J1 東京ヴェルディ vs 名古屋グランパス",
+    "category": "スポーツ",
+    "starts_at": "2026-11-21T14:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。味の素スタジアムでの対戦。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "J1 京都サンガF.C. vs 浦和レッズ",
+    "category": "スポーツ",
+    "starts_at": "2026-11-21T14:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。サンガスタジアムでの対戦。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "J1 サンフレッチェ広島 vs 横浜F・マリノス",
+    "category": "スポーツ",
+    "starts_at": "2026-11-21T14:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。エディオンピースウイング広島での対戦。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "テレビ朝日ドリームフェスティバル2026 DAY1",
     "category": "音楽・ライブ",
     "description": "Kアリーナ横浜。主な出演：JO1・Aぇ! groupほか。チケットは公式確認（売り切れの場合あり）。",
     "starts_at": "2026-11-21T15:00:00+09:00",
     "official_url": "https://dreamfestival.jp/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "J1 セレッソ大阪 vs FC東京",
+    "category": "スポーツ",
+    "starts_at": "2026-11-21T15:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。大阪でのリーグ戦。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "J1 ガンバ大阪 vs ファジアーノ岡山",
+    "category": "スポーツ",
+    "starts_at": "2026-11-21T16:00:00+09:00",
+    "official_url": "https://www.jleague.jp/j1/match/search-list/",
+    "description": "Jリーグ公式日程。パナソニックスタジアム吹田での対戦。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "M!LK ARENA TOUR 2026-2027 ぴあアリーナMM公演 DAY2",
@@ -128,6 +200,14 @@
     "verified_at": "2026-11-15T16:26:11+09:00"
   },
   {
+    "title": "アルステイク 単独公演『リロード』",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-22T18:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。チケットは公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "DUSTCELL LIVE 2026 ぴあアリーナMM公演",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-23",
@@ -160,6 +240,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "LIL LEAGUE's place『ATELIER』2026",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-24T18:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "Juice=Juice Room Tour 2026 ぴあアリーナMM公演",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-25",
@@ -174,6 +262,14 @@
     "starts_at": "2026-11-26T00:00:00+09:00",
     "official_url": "https://www.playstation.com/ja-jp/support/important-notice/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "TAHITI80 LIVE IN TOKYO",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-26T20:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "F1 カタールGP 開催週末",
@@ -208,6 +304,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "wave to earth『the pieces tour』東京公演",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-27T19:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "山下智久 TOUR 2026 DREAMING ぴあアリーナMM公演 DAY1",
     "category": "音楽・ライブ",
     "starts_at": "2026-11-28",
@@ -230,6 +334,14 @@
     "starts_at": "2026-11-28T17:00:00+09:00",
     "official_url": "https://rock-anthem.jp/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "宇都宮隆 LIVE UTSU BAR TOUR 2026",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-28T18:00:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "山下智久 TOUR 2026 DREAMING ぴあアリーナMM公演 DAY2",
@@ -262,6 +374,14 @@
     "starts_at": "2026-11-30",
     "official_url": "https://aws.amazon.com/events/reinvent/",
     "verified_at": "2026-11-16T07:38:00+09:00"
+  },
+  {
+    "title": "つばきファクトリー＆中島卓偉 2マンライブ",
+    "category": "音楽・ライブ",
+    "starts_at": "2026-11-30T18:30:00+09:00",
+    "official_url": "https://www.zepp.co.jp/hall/divercity/schedule/",
+    "description": "Zepp DiverCityで開催予定。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "『ゼノブレイド3 Nintendo Switch 2 Edition』発売",
@@ -376,6 +496,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "title": "朝日杯フューチュリティステークス（GⅠ）",
+    "category": "スポーツ",
+    "starts_at": "2026-12-20",
+    "official_url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "description": "阪神競馬場。発走時刻・出馬表はJRA公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "ジャンプフェスタ2027 DAY2",
     "category": "映画・アニメ",
     "description": "幕張メッセ。入場無料、事前応募・招待制。入場チケット要。",
@@ -400,12 +528,36 @@
     "verified_at": "2026-11-16T16:16:00+09:00"
   },
   {
+    "title": "中山大障害（J・GⅠ）",
+    "category": "スポーツ",
+    "starts_at": "2026-12-26",
+    "official_url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "description": "中山競馬場。発走時刻はJRA公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
+    "title": "ホープフルステークス（GⅠ）",
+    "category": "スポーツ",
+    "starts_at": "2026-12-26",
+    "official_url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "description": "中山競馬場。発走時刻はJRA公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
+  },
+  {
     "title": "COUNTDOWN JAPAN 26/27 開幕",
     "category": "音楽・ライブ",
     "starts_at": "2026-12-26T12:00:00+09:00",
     "description": "幕張メッセ。初日12:00開演予定。全券種完売で公式リセール案内あり。",
     "official_url": "https://countdownjapan.jp/2627/home/",
     "verified_at": "2026-11-16T08:49:00+09:00"
+  },
+  {
+    "title": "有馬記念（GⅠ）",
+    "category": "スポーツ",
+    "starts_at": "2026-12-27",
+    "official_url": "https://www.jra.go.jp/datafile/seiseki/replay/2026/g1.html",
+    "description": "中山競馬場。発走時刻はJRA公式で確認。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "COUNTDOWN JAPAN 26/27 最終日開演",
@@ -438,6 +590,14 @@
     "description": "東宝公式ラインナップに掲載された劇場公開予定日。",
     "official_url": "https://www.toho.co.jp/movie/lineup/",
     "verified_at": "2026-11-16T16:16:00+09:00"
+  },
+  {
+    "title": "『メトロイド ラヴェナス』発売",
+    "category": "ゲーム",
+    "starts_at": "2027-01-28",
+    "official_url": "https://www.nintendo.com/jp/games/switch2/lineup/index.html?category=edition",
+    "description": "任天堂のNintendo Switch 2発売予定一覧に掲載。開始時刻は未公表。",
+    "verified_at": "2026-11-16T16:26:00+09:00"
   },
   {
     "title": "映画『カイジ 人生リベンジゲーム』公開",
