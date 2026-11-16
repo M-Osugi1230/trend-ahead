@@ -1,0 +1,26 @@
+[
+  {
+    "title": "アオハル・ワンスモア",
+    "period": "2027-01",
+    "category": "映画・アニメ",
+    "kind": "anime_broadcast",
+    "official_url": "https://www.tv-tokyo.co.jp/anime/aoharuoncemore/",
+    "verified_at": "2026-11-16T15:59:50.616Z"
+  },
+  {
+    "title": "ペロペロ★スパ〜クルズ",
+    "period": "2027-01",
+    "category": "映画・アニメ",
+    "kind": "anime_broadcast",
+    "official_url": "https://www.tv-tokyo.co.jp/anime/peroperosparkles/onair/",
+    "verified_at": "2026-11-16T15:59:50.616Z"
+  },
+  {
+    "title": "ラーメン赤猫 其の二",
+    "period": "2027-01",
+    "category": "映画・アニメ",
+    "kind": "anime_broadcast",
+    "official_url": "https://www.tv-tokyo.co.jp/anime/ramenakaneko/",
+    "verified_at": "2026-11-16T15:59:50.616Z"
+  }
+]
