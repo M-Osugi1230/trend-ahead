@@ -12,6 +12,7 @@ from event_discovery import (
     extract_movie_title_date, extract_movie_date_title, extract_arena_month_day,
     extract_pokemon_goods_json,
     extract_tcg_product_list,
+    extract_yugioh_products,
     extract_k_arena_dates, extract_zepp_schedule,
 )
 
@@ -447,6 +448,48 @@ class DiscoveryTests(unittest.TestCase):
                         markdown.index("重複の可能性がある商品"))
         self.assertIn("実際の発売日とは限りません", markdown)
         self.assertIn("未確認・未公開", markdown)
+
+    def test_yugioh_official_products_require_exact_date(self):
+        source = {"id": "yugioh_products",
+                  "url": "https://www.yugioh-card.com/japan/products/",
+                  "category": "グルメ・商品",
+                  "kind": "yugioh_products", "max_candidates": 20}
+        html = """<ul>
+        <li>ジャンプフェスタ限定
+        コンセプトパック PREMIUM PACK 2027 2026年12月19日(土)
+        1ボックス 2,530円</li>
+        <li>構築済みデッキ THE CHRONICLES DECK DX マギストス
+        2026年12月5日(土) 1,980円</li>
+        <li>デュエリストアイテム YU-GI-OH! ART EXPANSION BOX
+        2026年12月下旬 11,000円</li>
+        <li>基本パック OLDER CARD PACK 2025年10月20日(月)</li>
+        </ul>"""
+        rows = extract_yugioh_products(html, source, NOW)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["title"], "PREMIUM PACK 2027 発売")
+        self.assertEqual(rows[0]["starts_at"], "2026-12-19")
+        self.assertEqual(rows[0]["availability_hint"],
+                         "limited_distribution_review_required")
+        self.assertEqual(rows[1]["starts_at"], "2026-12-05")
+        self.assertTrue(all("verified_at" not in row for row in rows))
+        self.assertTrue(all(row["status"] == "needs_review" for row in rows))
+        report = discover([source], [], NOW, lambda _: html)
+        self.assertEqual(report["queued"], 2)
+        self.assertEqual(len(report["observed"]), 2)
+
+    def test_observed_includes_already_curated_items(self):
+        source = {"id": "yugioh_products",
+                  "url": "https://www.yugioh-card.com/japan/products/",
+                  "category": "グルメ・商品",
+                  "kind": "yugioh_products"}
+        html = """<ul><li>構築済みデッキ THE CHRONICLES DECK DX マギストス
+        2026年12月5日(土)</li></ul>"""
+        match = extract_yugioh_products(html, source, NOW)[0]
+        curated = [{"title": match["title"], "starts_at": match["starts_at"],
+                    "category": "グルメ・商品"}]
+        report = discover([source], curated, NOW, lambda _: html)
+        self.assertEqual(report["queued"], 0)
+        self.assertEqual(len(report["observed"]), 1)
 
     def test_normalization_is_deterministic(self):
         self.assertEqual(normalize("JAPAN TEX 2026"), normalize("Japan-Tex 2026"))
