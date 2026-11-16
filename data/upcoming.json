@@ -544,6 +544,14 @@
     "verified_at": "2026-11-16T07:38:00+09:00"
   },
   {
+    "category": "グルメ・商品",
+    "title": "遊戯王OCG『THE CHRONICLES DECK DX マギストス』発売",
+    "starts_at": "2026-12-05",
+    "description": "遊戯王OCG公式の構築済みデッキ発売日。店頭の在庫・販売方法は各店舗で確認。",
+    "official_url": "https://www.yugioh-card.com/japan/products/ch03/",
+    "verified_at": "2026-11-16T15:41:54.164Z"
+  },
+  {
     "title": "チャンピオンズカップ（GⅠ）",
     "category": "スポーツ",
     "description": "中京競馬場で開催。発走時刻・出馬表はJRA当日情報を確認。",
@@ -646,6 +654,22 @@
     "description": "ヴァイスシュヴァルツ公式のプレミアムブースター発売日。",
     "official_url": "https://ws-tcg.com/products/cpk_pb/",
     "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
+    "category": "グルメ・商品",
+    "title": "遊戯王OCG『PREMIUM PACK 2027』ジャンプフェスタ限定発売",
+    "starts_at": "2026-12-19",
+    "description": "ジャンプフェスタ限定の商品発売予定。一般店舗で同日に購入できるという意味ではありません。",
+    "official_url": "https://www.yugioh-card.com/japan/products/",
+    "verified_at": "2026-11-16T15:41:54.164Z"
+  },
+  {
+    "category": "グルメ・商品",
+    "title": "遊戯王OCG『THE DARK SIDE OF DIMENSIONS 10th ANNIVERSARY MOVIE BOX』発売",
+    "starts_at": "2026-12-19",
+    "description": "遊戯王OCG公式サイト公表の発売予定日。",
+    "official_url": "https://www.yugioh-card.com/japan/products/mvb1/",
+    "verified_at": "2026-11-16T15:41:54.164Z"
   },
   {
     "title": "ジャンプフェスタ2027 DAY1",
@@ -782,6 +806,14 @@
     "description": "ヴァイスシュヴァルツ公式のプレミアムブースター発売日。",
     "official_url": "https://ws-tcg.com/products/ono_pb/",
     "verified_at": "2026-11-17T00:04:00+09:00"
+  },
+  {
+    "category": "グルメ・商品",
+    "title": "遊戯王OCG『PRIDE AND SOUL』発売",
+    "starts_at": "2027-01-23",
+    "description": "遊戯王OCG公式の商品一覧で公表された基本パックの発売予定日。",
+    "official_url": "https://www.yugioh-card.com/japan/products/",
+    "verified_at": "2026-11-16T15:41:54.164Z"
   },
   {
     "title": "『メトロイド ラヴェナス』発売",
