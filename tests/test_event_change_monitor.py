@@ -65,6 +65,20 @@ class EventChangeMonitorTest(unittest.TestCase):
         self.assertEqual(result["no_longer_seen_to_check"], [])
         self.assertEqual(len(result["source_issues"]), 1)
 
+    def test_partial_source_failure_flags_attention_without_false_cancellation(self):
+        previous = snapshot(report(
+            [event("予定A", "2026-12-03"), event("予定B", "2026-12-05", source="other")],
+            NOW - timedelta(hours=18)))
+        previous["sources"].append({"source_id": "other", "status": "ok"})
+        current = report([event("予定A", "2026-12-03")])
+        current["sources"].append({"source_id": "other",
+                                   "status": "fetch_or_parse_error"})
+        result = compare(previous, current, NOW)
+        self.assertEqual(result["status"], "attention")
+        self.assertEqual(result["no_longer_seen_to_check"], [])
+        self.assertEqual(result["comparison_sources"], ["venue"])
+        self.assertEqual(result["source_issues"][0]["source_id"], "other")
+
     def test_stale_baseline_never_causes_change_alert(self):
         old = snapshot(report([event("年末ライブ", "2026-12-03")],
                               NOW - timedelta(days=9)))
