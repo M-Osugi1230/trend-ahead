@@ -78,13 +78,5 @@
     "kind": "tcg_product_list",
     "max_candidates": 25,
     "description": "ヴァイスシュヴァルツ公式商品一覧。発売日候補のみ編集審査へ登録"
-  },
-  {
-    "id": "yugioh_products",
-    "url": "https://www.yugioh-card.com/japan/products/",
-    "category": "グルメ・商品",
-    "kind": "yugioh_products",
-    "max_candidates": 25,
-    "description": "遊戯王OCG公式発売予定。日付が確定した商品だけ候補化し、限定販売条件を審査"
   }
 ]
