@@ -567,16 +567,28 @@ def extract_zepp_schedule(html: str, source: dict, now: datetime):
     return found
 
 
+def _movie_title_key(title: str) -> str:
+    """Strip presentation words only for same-date film-release comparisons."""
+    value = normalize(title)
+    value = re.sub(r"^映画", "", value)
+    value = re.sub(r"(劇場公開|全国公開|公開)$", "", value)
+    return value
+
+
 def match_curated(candidate: dict, curated: list):
-    # Only exact same normalized titles/dates can be confidently de-duplicated.
     match_title = normalize(candidate["title"])
+    candidate_is_movie = candidate.get("event_type") == "movie_release"
+    film_key = _movie_title_key(candidate["title"]) if candidate_is_movie else ""
     for row in curated:
         official_title = normalize(str(row.get("title", "")))
         official_date = parse_date(str(row.get("starts_at", "")))
         if official_date and official_date.isoformat() == candidate["starts_at"]:
             if match_title == official_title:
                 return "exact_curated"
-            if len(match_title) >= 9 and len(official_title) >= 9:
+            if (candidate_is_movie and row.get("category") == "映画・アニメ"
+                    and len(film_key) >= 3 and film_key == _movie_title_key(row.get("title", ""))):
+                return "exact_curated"
+            if len(match_title) >= 3 and len(official_title) >= 5:
                 if match_title in official_title or official_title in match_title:
                     return "possible_curated"
     return None
