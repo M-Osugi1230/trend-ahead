@@ -87,8 +87,19 @@ def prepare(queue, approvals, curated, now):
             if normalized(title) != normalized(candidate["title"]):
                 raise ValueError("candidate title differs; investigate instead of silently renaming")
             day = event_day(approval["starts_at"])
-            if day.isoformat() != candidate["starts_at"]:
+            candidate_date = candidate["starts_at"]
+            if day != event_day(candidate_date):
                 raise ValueError("approved date differs from discovered date; investigate first")
+            if "T" in candidate_date:
+                # A source-supplied livestream time is never silently downgraded to
+                # an all-day event or modified without refreshing the source queue.
+                if "T" not in approval["starts_at"]:
+                    raise ValueError("confirmed source time must not be removed")
+                scheduled = datetime.fromisoformat(candidate_date)
+                approved = datetime.fromisoformat(approval["starts_at"])
+                if (scheduled.tzinfo is None or approved.tzinfo is None
+                        or scheduled.astimezone(timezone.utc) != approved.astimezone(timezone.utc)):
+                    raise ValueError("approved start time differs from official scheduled time")
             if day < now.astimezone(JST).date() or day > now.astimezone(JST).date() + timedelta(days=90):
                 raise ValueError("event is outside future 90-day window")
             checked = datetime.fromisoformat(approval["verified_at"])
