@@ -147,7 +147,8 @@ def compare(previous, current, now):
                     "reason": "new_or_newly_visible_source_listing",
                 })
     result["status"] = (
-        "attention" if result["date_changes_to_check"]
+        "attention" if result["source_issues"]
+        or result["date_changes_to_check"]
         or result["no_longer_seen_to_check"] or result["ambiguous_groups"]
         else "ok"
     )
