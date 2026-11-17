@@ -718,6 +718,12 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         return content
     write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals, new_arrivals, announcements)))
     write(output / 'announcements.json', json.dumps({'generated_at': now.isoformat(), 'precision': 'month_only', 'announcements': announcements, 'note': 'These records do not specify a calendar date or time and are excluded from ICS.'}, ensure_ascii=False, indent=2) + '\n')
+    write(output / 'health.json', json.dumps({
+        'schema_version': 1,
+        'built_at': now.isoformat(),
+        'collection': health,
+        'notice': 'Saved collection logs are not proof that scheduled jobs ran on time.',
+    }, ensure_ascii=False, indent=2) + '\n')
     write(output / 'signals.json', json.dumps({'generated_at': now.isoformat(), 'signals': signals, 'new_arrivals': new_arrivals, 'note': 'First sightings are separate from repeat-observation signals. Not a forecast probability.'}, ensure_ascii=False, indent=2) + '\n')
     create_subscription_feeds(output, rows, upcoming, now, site_url)
     write(output / 'week' / 'index.html', page_html(week_page(upcoming, now, site_url, indexing_enabled)))
