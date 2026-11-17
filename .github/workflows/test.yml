@@ -5,6 +5,8 @@ on:
       - "collector.py"
       - "forecast_ledger.py"
       - "collection_health.py"
+      - "pipeline_guard.py"
+      - ".github/workflows/watchdog.yml"
       - "backtest.py"
       - "outreach.py"
       - "event_audit.py"
