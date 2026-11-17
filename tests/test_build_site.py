@@ -92,6 +92,10 @@ class PublicSiteTest(unittest.TestCase):
             home = (Path(tmp) / 'dist/index.html').read_text(encoding='utf-8')
             self.assertIn('11/14', home)
             self.assertIn('一部または全部の情報源で失敗', home)
+            health_json = json.loads((Path(tmp) / 'dist/health.json').read_text(encoding='utf-8'))
+            self.assertEqual(health_json['collection']['status'], 'degraded')
+            self.assertEqual(health_json['collection']['last_feeds_ok'], 11)
+            self.assertEqual(health_json['schema_version'], 1)
 
     def test_calendar_feed_is_valid_with_all_verified_events(self):
         event = {'title': 'Official Event', 'official_url': 'https://example.org/event',
