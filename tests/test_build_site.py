@@ -76,6 +76,27 @@ class PublicSiteTest(unittest.TestCase):
             self.assertIn('データ更新が遅れています', home)
             self.assertEqual(report['collection']['last_feeds_ok'], 0)
 
+    def test_partial_rss_failures_are_not_displayed_as_healthy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'data'
+            (root / 'runs').mkdir(parents=True)
+            (root / 'runs/2026-11.jsonl').write_text(
+                json.dumps({
+                    'ran_at': (NOW - timedelta(minutes=10)).isoformat(),
+                    'feeds_ok': 11, 'feeds_total': 14,
+                    'feeds_failed': 3,
+                }) + '\n', encoding='utf-8')
+            report = collection_status(root, NOW)
+            self.assertEqual(report['status'], 'degraded')
+            build(root, Path(tmp) / 'dist', NOW)
+            home = (Path(tmp) / 'dist/index.html').read_text(encoding='utf-8')
+            self.assertIn('11/14', home)
+            self.assertIn('一部または全部の情報源で失敗', home)
+            health_json = json.loads((Path(tmp) / 'dist/health.json').read_text(encoding='utf-8'))
+            self.assertEqual(health_json['collection']['status'], 'degraded')
+            self.assertEqual(health_json['collection']['last_feeds_ok'], 11)
+            self.assertEqual(health_json['schema_version'], 1)
+
     def test_calendar_feed_is_valid_with_all_verified_events(self):
         event = {'title': 'Official Event', 'official_url': 'https://example.org/event',
                  'description': 'Details', 'starts_at': '2026-11-22T13:00:00+09:00',

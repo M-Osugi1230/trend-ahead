@@ -34,8 +34,8 @@ jobs:
         continue-on-error: true
         run: python collector.py
       - name: Freeze live forecasts at actual observation time
+        id: forecast
         if: steps.collector.outcome == 'success'
-        continue-on-error: true
         run: python forecast_ledger.py issue --data-dir data
       - name: Persist observations and failure logs
         if: always()
@@ -51,6 +51,6 @@ jobs:
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Fail if all sources failed
-        if: steps.collector.outcome == 'failure'
+        if: always() && steps.collector.outcome == 'failure'
         run: exit 1
 

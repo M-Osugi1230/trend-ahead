@@ -145,7 +145,8 @@ def collection_status(data_dir, now):
         status = 'not_started'
     elif age_minutes > 180:
         status = 'stale'
-    elif latest and latest[1].get('feeds_ok', 0) == 0:
+    elif latest and (latest[1].get('feeds_ok', 0) < latest[1].get('feeds_total', 0)
+                     or latest[1].get('feeds_skipped_rate_limit', 0) > 0):
         status = 'degraded'
     else:
         status = 'ok'
@@ -163,7 +164,10 @@ def health_message(health):
     if health['status'] == 'stale':
         return f'データ更新が遅れています。直近の収集成功：{when} JST。古い情報にはご注意ください。'
     if health['status'] == 'degraded':
-        return f'直近のデータ収集に失敗しました。最後の成功：{when} JST。'
+        ok = health['last_feeds_ok']
+        total = health['last_feeds_total']
+        return (f'直近の収集は一部または全部の情報源で失敗しました'
+                f'（{ok}/{total}ソース成功）。最後の収集成功：{when} JST。')
     return f'直近の収集成功：{when} JST（最終実行 {health["last_feeds_ok"]}/{health["last_feeds_total"]} ソース取得成功）'
 
 
@@ -714,6 +718,12 @@ def build(data_dir: Path, output: Path, now=None, site_url='', *, publish_ready=
         return content
     write(output / 'index.html', page_html(homepage(rows, upcoming, now, site_url, health, indexing_enabled, signals, new_arrivals, announcements)))
     write(output / 'announcements.json', json.dumps({'generated_at': now.isoformat(), 'precision': 'month_only', 'announcements': announcements, 'note': 'These records do not specify a calendar date or time and are excluded from ICS.'}, ensure_ascii=False, indent=2) + '\n')
+    write(output / 'health.json', json.dumps({
+        'schema_version': 1,
+        'built_at': now.isoformat(),
+        'collection': health,
+        'notice': 'Saved collection logs are not proof that scheduled jobs ran on time.',
+    }, ensure_ascii=False, indent=2) + '\n')
     write(output / 'signals.json', json.dumps({'generated_at': now.isoformat(), 'signals': signals, 'new_arrivals': new_arrivals, 'note': 'First sightings are separate from repeat-observation signals. Not a forecast probability.'}, ensure_ascii=False, indent=2) + '\n')
     create_subscription_feeds(output, rows, upcoming, now, site_url)
     write(output / 'week' / 'index.html', page_html(week_page(upcoming, now, site_url, indexing_enabled)))

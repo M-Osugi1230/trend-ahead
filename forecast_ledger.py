@@ -132,6 +132,21 @@ def build_forecasts(data_dir: Path, now: datetime, *, last_run_at: datetime) -> 
     return rows
 
 
+def record_issue_check(data_dir: Path, now: datetime, result: dict) -> dict:
+    """Always persist one auditable issue decision, including zero candidates.
+
+    Existing historical observations alone never become a fabricated forecast.
+    """
+    report = {"checked_at": now.isoformat(), "issued": result["issued"],
+              "reason": result["reason"],
+              "last_run_at": result.get("last_run_at")}
+    output = data_dir / "forecast_runs" / f"{now.astimezone(JST):%Y-%m}.jsonl"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n")
+    return result
+
+
 def issue_forecasts(data_dir: Path, now: datetime | None = None) -> dict:
     now = (now or datetime.now(UTC)).astimezone(UTC)
     runs_folder = data_dir / "runs"
@@ -151,7 +166,11 @@ def issue_forecasts(data_dir: Path, now: datetime | None = None) -> dict:
         except OSError:
             continue
     if last_run_at is None or not last_run or int(last_run.get("observations_added", 0)) == 0:
-        return {"issued": 0, "reason": "no_successful_trend_observations"}
+        return record_issue_check(
+            data_dir, now,
+            {"issued": 0, "reason": "no_successful_trend_observations",
+             "last_run_at": last_run_at.isoformat() if last_run_at else None},
+        )
     rows = build_forecasts(data_dir, now, last_run_at=last_run_at)
     if rows:
         target = data_dir / "predictions" / f"{now.astimezone(JST):%Y-%m-%d}.jsonl"
@@ -159,9 +178,12 @@ def issue_forecasts(data_dir: Path, now: datetime | None = None) -> dict:
         with target.open("a", encoding="utf-8") as handle:
             for row in rows:
                 handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
-    return {"issued": len(rows),
-            "reason": "new_snapshots" if rows else "insufficient_history_or_no_recent_collection",
-            "last_run_at": last_run_at.isoformat()}
+    return record_issue_check(
+        data_dir, now,
+        {"issued": len(rows),
+         "reason": "new_snapshots" if rows else "insufficient_history_or_no_recent_collection",
+         "last_run_at": last_run_at.isoformat()},
+    )
 
 
 def evaluate_forecasts(data_dir: Path, now: datetime | None = None) -> dict:

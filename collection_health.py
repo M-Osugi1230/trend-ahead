@@ -61,7 +61,7 @@ def audit(data_dir: Path, now: datetime | None = None) -> dict:
         "observed_run_records_24h": len(runs),
         "record_count_vs_target_slots": round(len(runs) / 48, 4),
         "last_run_at": latest[0].isoformat() if latest else None,
-        "minutes_since_last_run": round(lag.total_seconds() / 60, 1) if lag else None,
+        "minutes_since_last_run": round(lag.total_seconds() / 60, 1) if lag is not None else None,
         "median_gap_minutes": round(statistics.median(intervals), 1) if intervals else None,
         "max_gap_minutes": round(max(intervals), 1) if intervals else None,
         "completely_failed_runs_24h": failed,

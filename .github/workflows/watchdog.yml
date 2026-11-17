@@ -1,0 +1,36 @@
+name: Watch pipeline freshness
+on:
+  workflow_dispatch:
+  schedule:
+    # Independent hourly check, offset from RSS collection's :17/:47.
+    # GitHub-hosted schedules can be delayed or skipped.
+    - cron: "9 * * * *"
+permissions:
+  contents: read
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check committed collection and forecast audit freshness
+        run: |
+          python pipeline_guard.py --data-dir data \
+            --json-output reports/pipeline-health.json \
+            --markdown-output reports/pipeline-health.md \
+            --fail-on-critical
+      - name: Preserve diagnostics even when stale
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trend-ahead-pipeline-health
+          path: |
+            reports/pipeline-health.json
+            reports/pipeline-health.md
+          if-no-files-found: warn
+          retention-days: 14

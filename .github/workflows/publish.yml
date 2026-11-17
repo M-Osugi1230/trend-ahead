@@ -71,4 +71,8 @@ jobs:
                --retry 5 --retry-all-errors --retry-delay 3 \
                --max-time 15 "$PAGE_URL" -o /tmp/trend-ahead-index.html
           grep -q 'Trend Ahead' /tmp/trend-ahead-index.html
+          curl --fail --silent --show-error --location \
+               --retry 3 --retry-all-errors --retry-delay 3 \
+               --max-time 15 "${PAGE_URL%/}/health.json" -o /tmp/trend-ahead-health.json
+          python -c "import json; r=json.load(open('/tmp/trend-ahead-health.json')); assert r['schema_version']==1 and r['built_at'] and r['collection']['status'] in ('not_started','stale','degraded','ok'); print('Deployed collection status:',r['collection']['status'])"
 
