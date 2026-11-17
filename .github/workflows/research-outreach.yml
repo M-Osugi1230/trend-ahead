@@ -8,6 +8,7 @@ on:
       - 'trend_learning.py'
       - 'forecast_ledger.py'
       - 'collection_health.py'
+      - 'pipeline_guard.py'
       - 'data/verified_trend_cases_2025.json'
       - 'outreach.py'
       - 'event_audit.py'
@@ -45,6 +46,8 @@ jobs:
         run: python forecast_ledger.py evaluate --data-dir data --output reports/forecast-evaluation.json
       - name: Check actual RSS collection schedule and rate limits
         run: python collection_health.py --data-dir data --output reports/collection-health.json
+      - name: Audit collection and prospective-forecast pipeline health
+        run: python pipeline_guard.py --data-dir data --json-output reports/pipeline-health.json --markdown-output reports/pipeline-health.md
       - name: Restore prior official-event observation snapshot
         uses: actions/cache/restore@v4
         with:
@@ -87,6 +90,9 @@ jobs:
       - name: Show discovery queue and failed sources
         run: |
           python -c "import json; a=json.load(open('reports/event-candidates.json')); print({k:a[k] for k in ('status','sources_ok','sources_total','queued')}); print(a['sources'])"
+      - name: Show independent pipeline freshness and forecast-issue audit
+        run: |
+          python -c "import json; r=json.load(open('reports/pipeline-health.json')); print({'status': r['status'], 'forecast_audit': r['forecast_audit']['state'], 'lag_min': r['collection']['minutes_since_last_run']})"
       - name: Show official discovery-to-catalog gap coverage
         run: |
           python -c "import json; p=json.load(open('reports/official-coverage.json')); print({k:p[k] for k in ('status','sources_parseable','official_events_observed','already_in_approved_calendar','unlisted_official_candidates','possible_duplicates')})"
