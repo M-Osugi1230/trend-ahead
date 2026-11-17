@@ -16,7 +16,7 @@ from collection_health import audit as collection_audit, dt
 UTC = timezone.utc
 CRITICAL_AFTER_MINUTES = 120
 RECENT_AFTER_MINUTES = 75
-MIN_RUNS_PER_24H = 36
+MIN_RUNS_PER_24H = 46  # 95% of 48 expected half-hourly slots, rounded up
 
 
 def latest_forecast_journal(data_dir: Path, now: datetime) -> dict | None:
